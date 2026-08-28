@@ -18,6 +18,7 @@ frontend/dist/
 coverage/
 playwright-report/
 test-results/
+*.tsbuildinfo
 
 # Environment / secrets
 .env
