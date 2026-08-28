@@ -118,7 +118,7 @@ class AnalyzeRequest(BaseModel):
     include_sentences: bool = Field(
         default=False,
         description=(
-            "Also analyse each sentence independently (up to the "
+            "Also analyze each sentence independently (up to the "
             "configured sentence limit)."
         ),
     )
@@ -143,7 +143,7 @@ class AnalyzeResponse(BaseModel):
     all_emotions: list[EmotionScore] = Field(
         description=(
             "All 28 emotions sorted by score descending, for the "
-            "full-spectrum visualisation."
+            "full-spectrum visualization."
         )
     )
     intensity: Intensity

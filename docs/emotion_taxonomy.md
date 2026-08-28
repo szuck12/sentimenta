@@ -19,7 +19,7 @@ confidence score.
 |-------|-------|-------------|
 | admiration | 👏 | Recognising someone or something as impressive or excellent. |
 | amusement | 😄 | Finding something funny or entertaining. |
-| approval | 👍 | Expressing agreement or a favourable judgement. |
+| approval | 👍 | Expressing agreement or a favorable judgement. |
 | caring | 🤗 | Showing warmth, concern, or compassion for others. |
 | desire | ✨ | Hoping for or wanting something to happen. |
 | excitement | 🤩 | High energy and eager anticipation. |
@@ -37,7 +37,7 @@ confidence score.
 | anger | 😠 | Strong feelings of displeasure or hostility. |
 | annoyance | 😒 | Mild irritation or being bothered by something. |
 | disappointment | 😞 | Feeling let down when expectations are not met. |
-| disapproval | 👎 | Expressing disagreement or disfavour. |
+| disapproval | 👎 | Expressing disagreement or disfavor. |
 | disgust | 🤢 | Feeling repelled or strongly put off. |
 | embarrassment | 😳 | Feeling awkward, self-conscious, or ashamed. |
 | fear | 😨 | Feeling afraid or worried about danger. |
@@ -102,7 +102,7 @@ GROUP_MEMBERS: dict[EmotionGroup, tuple[Emotion, ...]] = {
 
 | Group | Members | Rationale |
 |-------|---------|-----------|
-| **Positive & affiliative** | 12 | Emotions that signal well-being, connection, or favourable states. They tend to co-occur in texts expressing happiness, gratitude, or social bonding. |
+| **Positive & affiliative** | 12 | Emotions that signal well-being, connection, or favorable states. They tend to co-occur in texts expressing happiness, gratitude, or social bonding. |
 | **Negative & heavy** | 11 | Emotions that signal distress, displeasure, or aversive states. They tend to co-occur in texts expressing pain, conflict, or loss. |
 | **Cognitive & ambiguous** | 4 | Emotions that are information-processing states rather than clearly positive or negative. Confusion and curiosity can lead anywhere; surprise can be pleasant or unpleasant. |
 | **Neutral** | 1 | The absence of a strong emotional signal. Used as the baseline for intensity computation. |
@@ -122,7 +122,7 @@ How It Works page.
 
 ### Profile Visualization
 
-The emotional profile sums each group's member scores and normalises
+The emotional profile sums each group's member scores and normalizes
 them to shares that sum to 1.0:
 
 ```json
@@ -143,7 +143,7 @@ them to shares that sum to 1.0:
 ```
 
 The `shares` are used by the frontend to render proportional
-visualisations (e.g. a bar chart or pie chart showing the emotional
+visualizations (e.g. a bar chart or pie chart showing the emotional
 composition).
 
 ### Color Coding
@@ -262,7 +262,7 @@ Likely high scores:
 
 ## 6. Common Co-occurrence Patterns
 
-Based on the model's behaviour and the semantic relationships between
+Based on the model's behavior and the semantic relationships between
 emotions:
 
 | Primary | Often co-occurs with | Why |

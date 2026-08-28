@@ -42,7 +42,7 @@ class EmotionModelService:
 
     The service owns all PyTorch/Hugging Face state so the rest of
     the application never touches the model directly. One instance is
-    created at startup and reused for every request; a lock serialises
+    created at startup and reused for every request; a lock serializes
     forward passes when requests arrive concurrently.
 
     Attributes:
@@ -246,7 +246,7 @@ class EmotionModelService:
         )
 
     def exceeds_token_budget(self, text: str) -> bool:
-        """Check tokenisation length without running the model.
+        """Check tokenization length without running the model.
 
         Args:
             text: Input text.
@@ -266,7 +266,7 @@ class EmotionModelService:
         """Run a gradient-enabled forward pass under the model lock.
 
         Exposed for the explanation service's attribution methods,
-        which must serialise their many small forward passes with
+        which must serialize their many small forward passes with
         ordinary inference.
 
         Args:

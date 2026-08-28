@@ -40,10 +40,10 @@ class ExplanationService:
         self.settings = settings
 
     def explain(self, text: str, prediction_scores: dict[Emotion, float]) -> Explanation:
-        """Explain why ``prediction_scores`` favour a primary emotion.
+        """Explain why ``prediction_scores`` favor a primary emotion.
 
         Args:
-            text: The analysed input text.
+            text: The analyzed input text.
             prediction_scores: Full 28-label probability mapping from
                 the primary inference pass.
 
@@ -137,7 +137,7 @@ class ExplanationService:
             target: The emotion output neuron to attribute against.
 
         Returns:
-            Up to three phrases with normalised positive weights;
+            Up to three phrases with normalized positive weights;
             empty list when no token supports the target emotion.
 
         Raises:
@@ -202,7 +202,7 @@ class ExplanationService:
 
         Returns:
             Up to three adjacent-word phrases with the strongest
-            positive contribution, weights normalised to sum to 1.
+            positive contribution, weights normalized to sum to 1.
         """
 
         @dataclass

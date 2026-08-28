@@ -9,7 +9,7 @@
     {"text": "Wait, how does that even work?", "expected": "confusion"},
     {"text": "I wonder what would happen if we tried a different approach.", "expected": "curiosity"},
     {"text": "I really want to visit Japan someday.", "expected": "desire"},
-    {"text": "I was really looking forward to that concert and it got cancelled.", "expected": "disappointment"},
+    {"text": "I was really looking forward to that concert and it got canceled.", "expected": "disappointment"},
     {"text": "I don't think this is a good idea at all.", "expected": "disapproval"},
     {"text": "That food looked absolutely revolting.", "expected": "disgust"},
     {"text": "I can't believe I tripped on stage in front of everyone.", "expected": "embarrassment"},

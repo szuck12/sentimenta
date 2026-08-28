@@ -90,7 +90,7 @@ def analyze(
     request: AnalyzeRequest,
     service: AnalysisService = Depends(get_analysis_service),
 ) -> AnalyzeResponse:
-    """Analyse one block of text and explain the reading.
+    """Analyze one block of text and explain the reading.
 
     The primary emotion, all detected secondary emotions, derived
     intensity/profile metrics, an evidence-based explanation, and —
@@ -108,5 +108,5 @@ def analyze_sentences(
     request: SentenceAnalysisRequest,
     service: AnalysisService = Depends(get_analysis_service),
 ) -> SentenceAnalysisResponse:
-    """Analyse each sentence of the input independently."""
+    """Analyze each sentence of the input independently."""
     return service.analyze_sentences(request.text)

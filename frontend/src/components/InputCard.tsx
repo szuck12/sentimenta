@@ -16,7 +16,7 @@ const MAX_CHARS = 2000
 const schema = z.object({
   text: z
     .string()
-    .min(1, 'Please enter some text to analyse.')
+    .min(1, 'Please enter some text to analyze.')
     .max(MAX_CHARS, `Text must be ${MAX_CHARS} characters or fewer.`),
 })
 
@@ -159,7 +159,7 @@ export function InputCard({ status, onSubmit, onReset }: Props) {
             ) : (
               <>
                 <Sparkles size={16} />
-                Analyse Emotion
+                Analyze Emotion
               </>
             )}
           </Button>

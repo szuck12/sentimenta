@@ -349,7 +349,7 @@ automatically selects CPU when MPS is unavailable.
 
 ### Frontend shows "Failed to fetch"
 
-**Symptom**: Error banner appears immediately after clicking Analyse.
+**Symptom**: Error banner appears immediately after clicking Analyze.
 
 **Fix**: Ensure the backend is running on port 8000. The Vite proxy
 only works in dev mode (`npm run dev`), not in production builds.

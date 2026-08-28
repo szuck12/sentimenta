@@ -145,7 +145,7 @@ Defined via CVA in `components/ui/Button.tsx`:
 
 | Variant | Classes | Usage |
 |---------|---------|-------|
-| `primary` | `bg-coral-500 text-white hover:bg-coral-600 shadow-sm` | Main "Analyse Emotion" action |
+| `primary` | `bg-coral-500 text-white hover:bg-coral-600 shadow-sm` | Main "Analyze Emotion" action |
 | `secondary` | `bg-cream-200 text-ink-700 hover:bg-cream-300` | Alternative actions |
 | `ghost` | `bg-transparent text-ink-700 hover:bg-cream-200` | "Start over" button |
 
@@ -220,7 +220,7 @@ crossfade between cycling messages. Text animates from `y: 8` to `y: 0`.
 
 - **Loading dots**: `animate-pulse-soft` with staggered `animationDelay`
   (0s, 0.2s, 0.4s).
-- **Spinner on Analyse button**: `animate-spin` on a CSS border spinner.
+- **Spinner on Analyze button**: `animate-spin` on a CSS border spinner.
 - **Primary emotion ring**: `transition: stroke-dashoffset 0.8s ease-out`
   for the SVG ring animation.
 - **Bar widths**: `transition-all duration-500` for smooth bar growth.

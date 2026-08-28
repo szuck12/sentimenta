@@ -1,5 +1,5 @@
 # backend/app/services/preprocessing.py
-# Text normalisation, counting, and sentence segmentation used before
+# Text normalization, counting, and sentence segmentation used before
 # (and after) model inference.
 
 import re

@@ -6,7 +6,7 @@ from enum import Enum
 
 
 class EmotionGroup(str, Enum):
-    """Sentimenta's visualisation groups for the 27 GoEmotions labels.
+    """Sentimenta's visualization groups for the 27 GoEmotions labels.
 
     Note:
         These groupings are a Sentimenta presentation layer, not an
@@ -95,14 +95,14 @@ DESCRIPTIONS: dict[Emotion, str] = {
     Emotion.AMUSEMENT: "Finding something funny or entertaining.",
     Emotion.ANGER: "Strong feelings of displeasure or hostility.",
     Emotion.ANNOYANCE: "Mild irritation or being bothered by something.",
-    Emotion.APPROVAL: "Expressing agreement or a favourable judgement.",
+    Emotion.APPROVAL: "Expressing agreement or a favorable judgement.",
     Emotion.CARING: "Showing warmth, concern, or compassion for others.",
     Emotion.CONFUSION: "Feeling puzzled or unable to understand.",
     Emotion.CURIOSITY: "Wanting to learn or know more about something.",
     Emotion.DESIRE: "Hoping for or wanting something to happen.",
     Emotion.DISAPPOINTMENT: "Feeling let down when expectations are "
                             "not met.",
-    Emotion.DISAPPROVAL: "Expressing disagreement or disfavour.",
+    Emotion.DISAPPROVAL: "Expressing disagreement or disfavor.",
     Emotion.DISGUST: "Feeling repelled or strongly put off.",
     Emotion.EMBARRASSMENT: "Feeling awkward, self-conscious, or ashamed.",
     Emotion.EXCITEMENT: "High energy and eager anticipation.",
@@ -123,7 +123,7 @@ DESCRIPTIONS: dict[Emotion, str] = {
 }
 
 # Sentimenta's grouping of the 27 non-neutral labels into three broad
-# conceptual families used by the emotional-profile visualisation.
+# conceptual families used by the emotional-profile visualization.
 GROUP_MEMBERS: dict[EmotionGroup, tuple[Emotion, ...]] = {
     EmotionGroup.POSITIVE: (
         Emotion.ADMIRATION,

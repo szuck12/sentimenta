@@ -20,10 +20,10 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Emotional profile grouping: positive/affiliative, negative/heavy,
   cognitive/ambiguous, neutral.
 - Multi-sentence analysis with emotional journey timeline.
-- Collapsible full 28-emotion spectrum visualisation.
+- Collapsible full 28-emotion spectrum visualization.
 - Example texts for immediate exploration.
 - Backend test suite: unit tests, API tests (stub model), real-model
-  integration tests (14 edge-case and behaviour tests).
+  integration tests (14 edge-case and behavior tests).
 - Frontend component tests with Vitest and React Testing Library.
 - CI configuration (GitHub Actions).
 - Project documentation: architecture, API docs, testing guide,

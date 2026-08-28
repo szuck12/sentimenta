@@ -84,7 +84,7 @@ Every item follows this format:
 | `#model` | PyTorch, Hugging Face, Captum, inference, attribution |
 | `#test` | Unit tests, API tests, model tests, E2E tests |
 | `#docs` | Documentation files, README, guides |
-| `#refactor` | Code restructuring without behaviour change |
+| `#refactor` | Code restructuring without behavior change |
 | `#infra` | CI/CD, tooling, pre-commit, GitHub Actions |
 | `#accessibility` | Keyboard navigation, screen readers, ARIA, contrast |
 
@@ -92,7 +92,7 @@ Every item follows this format:
 
 ```markdown
 - [ ] Add E2E tests with Playwright covering the full analyze flow (#test)
-- [ ] Investigate ONNX Runtime + quantised model for faster inference (#model)
+- [ ] Investigate ONNX Runtime + quantized model for faster inference (#model)
 - [ ] Add reduced-motion media query support to animations (#frontend)
 - [ ] Add axe-core accessibility tests to CI (#accessibility, #test)
 ```
@@ -186,7 +186,7 @@ The following items are currently tracked (as of v0.1.0):
 ### Medium Priority
 
 - [ ] Test Captum attribution against known phrase-level expectations (#test, #model)
-- [ ] Investigate ONNX Runtime + quantised model for faster inference (#model)
+- [ ] Investigate ONNX Runtime + quantized model for faster inference (#model)
 - [ ] Add character/word count to the SentenceAnalysis response (#backend)
 
 ### Low Priority
@@ -196,5 +196,5 @@ The following items are currently tracked (as of v0.1.0):
 
 ### Ideas
 
-- [ ] Radial bubble visualisation as an alternative to the bar chart (#frontend)
+- [ ] Radial bubble visualization as an alternative to the bar chart (#frontend)
 - [ ] User-configurable emotion threshold in the UI (#frontend)

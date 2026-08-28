@@ -38,7 +38,7 @@ human-readable and safe to display to users.
 
 | Code | Status | Meaning |
 |------|--------|---------|
-| `empty_text` | 422 | Submitted text is empty or whitespace-only after normalisation. |
+| `empty_text` | 422 | Submitted text is empty or whitespace-only after normalization. |
 | `text_too_long` | 422 | Text exceeds `SENTIMENTA_MAX_TEXT_CHARS` (default 2000). |
 | `model_unavailable` | 503 | The emotion model is still loading at startup. |
 | `invalid_request` | 422 | Pydantic validation failed (missing field, wrong type, etc.). |
@@ -143,7 +143,7 @@ Returns the full GoEmotions taxonomy with Sentimenta display metadata.
       "label": "approval",
       "emoji": "👍",
       "group": "positive",
-      "description": "Expressing agreement or a favourable judgement."
+      "description": "Expressing agreement or a favorable judgement."
     },
     {
       "label": "caring",
@@ -179,7 +179,7 @@ Returns the full GoEmotions taxonomy with Sentimenta display metadata.
       "label": "disapproval",
       "emoji": "👎",
       "group": "negative",
-      "description": "Expressing disagreement or disfavour."
+      "description": "Expressing disagreement or disfavor."
     },
     {
       "label": "disgust",
@@ -295,7 +295,7 @@ Returns the full GoEmotions taxonomy with Sentimenta display metadata.
 
 ---
 
-### POST /api/analyse a single block of text.
+### POST /api/analyze a single block of text.
 
 **Request Body**
 
@@ -309,7 +309,7 @@ Returns the full GoEmotions taxonomy with Sentimenta display metadata.
 | Field | Type | Required | Default | Description |
 |-------|------|----------|---------|-------------|
 | `text` | string | Yes | — | Input text. 1–2,000 characters. |
-| `include_sentences` | boolean | No | `false` | Also analyse each sentence independently (up to 10). |
+| `include_sentences` | boolean | No | `false` | Also analyze each sentence independently (up to 10). |
 
 **Response: 200 OK**
 
@@ -429,7 +429,7 @@ When enabled, the `sentences` array is populated:
 
 | Status | Code | When |
 |--------|------|------|
-| 422 | `empty_text` | Text is empty or whitespace-only after normalisation. |
+| 422 | `empty_text` | Text is empty or whitespace-only after normalization. |
 | 422 | `text_too_long` | Text exceeds 2,000 characters. |
 | 422 | `invalid_request` | Missing `text` field or wrong type. |
 | 503 | `model_unavailable` | Model still loading (startup). |
@@ -497,7 +497,7 @@ emotional shifts across a passage.
 |-------|------|-------------|
 | `sentences` | array | Per-sentence analysis results in original order. |
 | `sentences[].index` | integer | Zero-based position in the input. |
-| `sentences[].text` | string | The sentence text (whitespace-normalised). |
+| `sentences[].text` | string | The sentence text (whitespace-normalized). |
 | `sentences[].primary_emotion` | EmotionScore | Highest-scoring emotion for this sentence. |
 | `sentences[].emotions` | EmotionScore[] | All emotions at or above the detection threshold. |
 | `metadata` | AnalyzeMetadata | Processing metadata (same schema as `/api/analyze`). |
@@ -557,7 +557,7 @@ emotional shifts across a passage.
 ```
 
 Each group value is the sum of its member emotions' sigmoid
-probabilities. Shares are normalised to sum to 1.0.
+probabilities. Shares are normalized to sum to 1.0.
 
 ### Explanation
 
@@ -576,7 +576,7 @@ probabilities. Shares are normalised to sum to 1.0.
 | Field | Type | Description |
 |-------|------|-------------|
 | `summary` | string | Template-generated factual description from model outputs. |
-| `signals` | EvidenceSignal[] | Up to 3 key phrases with normalised weights. Empty when attribution is unavailable. |
+| `signals` | EvidenceSignal[] | Up to 3 key phrases with normalized weights. Empty when attribution is unavailable. |
 | `method` | string | `"integrated_gradients"` or `"probabilities"`. |
 | `target_label` | string | The primary emotion being explained. |
 
@@ -592,4 +592,4 @@ probabilities. Shares are normalised to sum to 1.0.
 | Field | Type | Range | Description |
 |-------|------|-------|-------------|
 | `text` | string | — | A phrase from the input text. |
-| `weight` | float | -1.0–1.0 | Attribution strength. Positive values support the target emotion. Weights across all signals are normalised to sum to 1.0. |
+| `weight` | float | -1.0–1.0 | Attribution strength. Positive values support the target emotion. Weights across all signals are normalized to sum to 1.0. |

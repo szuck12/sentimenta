@@ -46,11 +46,11 @@ class AnalysisService:
             raise ModelUnavailableError()
 
     def analyze(self, text: str, include_sentences: bool) -> AnalyzeResponse:
-        """Analyse one block of text end-to-end.
+        """Analyze one block of text end-to-end.
 
         Args:
             text: Raw user input (already length-validated).
-            include_sentences: When True, also analyse each sentence
+            include_sentences: When True, also analyze each sentence
                 independently (bounded by ``sentence_limit``).
 
         Returns:
@@ -58,7 +58,7 @@ class AnalysisService:
 
         Raises:
             EmptyTextError: If nothing usable remains after
-                normalisation.
+                normalization.
             ModelUnavailableError: If the model is still loading.
         """
         started = time.perf_counter()
@@ -120,7 +120,7 @@ class AnalysisService:
         )
 
     def analyze_sentences(self, text: str) -> SentenceAnalysisResponse:
-        """Analyse each sentence of ``text`` independently.
+        """Analyze each sentence of ``text`` independently.
 
         Args:
             text: Raw user input.
@@ -152,10 +152,10 @@ class AnalysisService:
     def _analyze_sentences(
         self, normalized: str
     ) -> list[SentenceAnalysis]:
-        """Batch-analyse up to ``sentence_limit`` sentences.
+        """Batch-analyze up to ``sentence_limit`` sentences.
 
         Args:
-            normalized: Whitespace-normalised full input.
+            normalized: Whitespace-normalized full input.
 
         Returns:
             One SentenceAnalysis per processed sentence with its own

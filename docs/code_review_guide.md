@@ -72,7 +72,7 @@ See `docs/commenting_guidelines.md` for the full standard. Key rules:
   module-level singletons in `routes.py`.
 - Tests must never load the real model in fast test runs. Use
   `StubAnalysisService` and `_StubModelService` from `conftest.py`.
-- The `threading.Lock` in `EmotionModelService` serialises forward
+- The `threading.Lock` in `EmotionModelService` serializes forward
   passes. New methods that touch `self.model` must respect this lock.
 
 ### Error Handling
@@ -158,7 +158,7 @@ See `docs/commenting_guidelines.md` for the full standard. Key rules:
 - Captum attribution targets the primary emotion's output neuron. The
   `target_idx` must come from `model.config.label2id[target.value]`.
 - Word aggregation uses offset mappings from the tokenizer. Changes to
-  the tokenisation pipeline may break attribution — verify with model
+  the tokenization pipeline may break attribution — verify with model
   tests.
 - The `_SIGNAL_CUTOFF_RATIO` (0.15) filters low-attribution words.
   Changes to this constant affect which phrases appear as evidence.

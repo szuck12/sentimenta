@@ -111,7 +111,7 @@ All tests in `TestModelInference` and `TestSentenceAnalysis` verify:
 2. **Relative ordering** — known emotional texts produce the expected
    dominant emotion (excitement text → `EXCITEMENT > SADNESS`, sadness
    text → `SADNESS > JOY`, etc.).
-3. **Multi-label behaviour** — mixed-emotion text produces high scores
+3. **Multi-label behavior** — mixed-emotion text produces high scores
    for multiple labels simultaneously.
 4. **All 28 labels returned** — the output contains exactly the 28
    `Emotion` enum members.
@@ -129,7 +129,7 @@ The file `tests/fixtures/go_emotions_corpus.json` contains:
 
 - **`emotion_samples`**: 28 entries, one per GoEmotions label, each
   with a representative `text` and `expected` label. Used as a reference
-  for validating model behaviour against expected emotions.
+  for validating model behavior against expected emotions.
 - **`adversarial_samples`**: 18 entries covering sarcasm, negation,
   mixed emotions, empty input, whitespace-only, single word, emoji-only,
   punctuation-heavy, repetition, numbers, URLs, unicode, multiline,
@@ -159,7 +159,7 @@ from fast test runs.
 ### What Is Tested (`InputCard.test.tsx`)
 
 - Renders textarea with placeholder text.
-- Renders "Analyse Emotion" button.
+- Renders "Analyze Emotion" button.
 - Displays character count.
 - Shows example chips (Excitement, Neutral, etc.).
 - Populates textarea on example chip click.
@@ -191,7 +191,7 @@ npm run test:watch
 
 The 8 planned E2E test scenarios from the project spec:
 
-1. **Happy path** — type text, click Analyse, verify primary emotion
+1. **Happy path** — type text, click Analyze, verify primary emotion
    card renders with label and score.
 2. **Example chip** — click an example chip, verify textarea populates,
    submit, verify results appear.

@@ -73,14 +73,14 @@ def compute_profile(scores: dict[Emotion, float]) -> Profile:
 
     Each group's value is the sum of its member emotions' sigmoid
     probabilities (multi-label outputs do not sum to one, so sums can
-    exceed 1). Shares normalise the four group sums to total 1 so the
+    exceed 1). Shares normalize the four group sums to total 1 so the
     frontend can render them as parts-of-a-whole.
 
     Args:
         scores: Mapping of all 28 labels to probabilities.
 
     Returns:
-        A Profile with per-group sums plus normalised shares.
+        A Profile with per-group sums plus normalized shares.
     """
     totals: dict[EmotionGroup, float] = {}
     for group in EmotionGroup:

@@ -23,7 +23,7 @@
 
 - [ ] Test Captum attribution against known phrase-level expectations
       (#test, #model)
-- [ ] Investigate ONNX Runtime + quantised model for faster inference
+- [ ] Investigate ONNX Runtime + quantized model for faster inference
       (#performance)
 - [ ] Add character/word count to the SentenceAnalysis response (#api)
 
@@ -38,6 +38,6 @@
 
 (Interesting ideas not yet committed to implementation.)
 
-- [ ] Radial bubble visualisation as an alternative to the bar chart
+- [ ] Radial bubble visualization as an alternative to the bar chart
       (#frontend)
 - [ ] User-configurable emotion threshold in the UI (#frontend)

@@ -47,7 +47,7 @@ def compute_intensity(scores: dict[Emotion, float]) -> Intensity:
 
 - **One-line summary**: Imperative mood, ends with a period.
 - **Extended description**: Blank line, then prose explaining the
-  behaviour. Use ```double backticks``` for code references.
+  behavior. Use ```double backticks``` for code references.
 - **Args**: Each parameter on its own line, indented, with type and
   description.
 - **Returns**: Description of the return value.
@@ -55,7 +55,7 @@ def compute_intensity(scores: dict[Emotion, float]) -> Intensity:
 
 ### When to Skip Docstrings
 
-- Private methods with obvious behaviour (`_require_loaded`, `_to_scores`)
+- Private methods with obvious behavior (`_require_loaded`, `_to_scores`)
   may have a single-line docstring or none if the name is self-documenting.
 - Properties that simply return a value may omit docstrings.
 - Test functions (`test_*`) never have docstrings — the function name

@@ -42,9 +42,9 @@ export function Emotions() {
           The 28 Emotions
         </h1>
         <p className="text-ink-700/60 max-w-2xl leading-relaxed">
-          GoEmotions recognises 27 specific emotions plus neutral.
+          GoEmotions recognizes 27 specific emotions plus neutral.
           Sentimenta groups them into broad families for
-          visualisation, but each label is distinct.
+          visualization, but each label is distinct.
         </p>
       </section>
 
@@ -81,7 +81,7 @@ export function Emotions() {
           href="/#analyze"
           className="text-coral-500 hover:text-coral-600 text-sm font-semibold"
         >
-          Analyse some text →
+          Analyze some text →
         </a>
       </section>
     </main>

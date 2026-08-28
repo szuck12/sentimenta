@@ -1,5 +1,5 @@
 # backend/tests/unit/test_preprocessing.py
-# Tests for text normalisation, word counting, and sentence splitting.
+# Tests for text normalization, word counting, and sentence splitting.
 
 from app.services.preprocessing import (
     count_words,

@@ -16,7 +16,7 @@ describe('InputCard', () => {
   it('renders textarea and button', () => {
     render(<InputCard {...defaultProps} />)
     expect(screen.getByPlaceholderText(/read between the lines/i)).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /analyse emotion/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /analyze emotion/i })).toBeInTheDocument()
   })
 
   it('shows character count', () => {

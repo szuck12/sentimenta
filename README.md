@@ -25,13 +25,13 @@ inside the backend.
   charged your text is.
 - **Emotional profile** — grouped into positive, negative, cognitive,
   and neutral families with share percentages.
-- **Sentence-level analysis** — each sentence independently analysed
+- **Sentence-level analysis** — each sentence independently analyzed
   when text contains multiple sentences.
-- **Emotional journey** — visualise how emotions shift across your text.
+- **Emotional journey** — visualize how emotions shift across your text.
 - **Full spectrum view** — all 28 emotions shown as interactive bars.
 - **Responsive design** — works beautifully on mobile, tablet, and
   desktop.
-- **Privacy-first** — your text is analysed and returned; nothing is
+- **Privacy-first** — your text is analyzed and returned; nothing is
   stored.
 
 ## Tech Stack
@@ -45,7 +45,7 @@ inside the backend.
 | Vite 7 | Build and dev tooling |
 | Tailwind CSS 3 | Styling and responsive design |
 | Framer Motion | Animations and transitions |
-| Recharts | Emotion visualisations |
+| Recharts | Emotion visualizations |
 | React Hook Form + Zod | Form management and validation |
 | React Router 7 | Client-side routing |
 | Vitest | Unit and component tests |
@@ -58,7 +58,7 @@ inside the backend.
 | FastAPI | REST API |
 | Pydantic v2 | Request/response validation |
 | PyTorch | Model inference |
-| Transformers | Model loading and tokenisation |
+| Transformers | Model loading and tokenization |
 | Captum | Token-level attribution |
 | Uvicorn | ASGI server |
 
@@ -71,7 +71,7 @@ inside the backend.
 | Training data | GoEmotions — 58,000 Reddit comments |
 | Labels | 27 emotions + neutral (28 total) |
 | Classification | Multi-label (sigmoid per emotion) |
-| Licence | MIT |
+| License | MIT |
 
 ## Architecture
 
@@ -103,7 +103,7 @@ design.
 ```
 sentimenta/
 ├── CHANGELOG.md              # Version history
-├── LICENSE                   # MIT licence
+├── LICENSE                   # MIT license
 ├── README.md                 # This file
 ├── SECURITY.md               # Security policy
 ├── TODO.md                   # Planned work
@@ -128,7 +128,7 @@ sentimenta/
 │   │       ├── emotion_model_service.py # HF model singleton
 │   │       ├── explanation_service.py   # Captum attribution
 │   │       ├── metrics.py               # Intensity, profile
-│   │       └── preprocessing.py         # Text normalisation
+│   │       └── preprocessing.py         # Text normalization
 │   ├── tests/
 │   │   ├── unit/             # Fast pure-logic tests
 │   │   ├── api/              # HTTP round-trip tests (stubbed model)
@@ -160,7 +160,7 @@ sentimenta/
 │   │   │   ├── InputCard.tsx
 │   │   │   ├── LoadingState.tsx
 │   │   │   ├── ui/           # Button, Card, Badge
-│   │   │   └── results/      # All result visualisation cards
+│   │   │   └── results/      # All result visualization cards
 │   │   ├── hooks/
 │   │   │   └── useAnalysis.ts
 │   │   ├── lib/
@@ -255,8 +255,8 @@ methodology.
 |--------|------|-------------|
 | GET | `/api/health` | Service liveness + model status |
 | GET | `/api/emotions` | Full 28-emotion taxonomy |
-| POST | `/api/analyze` | Analyse a block of text |
-| POST | `/api/analyze/sentences` | Analyse each sentence independently |
+| POST | `/api/analyze` | Analyze a block of text |
+| POST | `/api/analyze/sentences` | Analyze each sentence independently |
 
 ### Example
 
@@ -290,7 +290,7 @@ See [docs/ml_model_guide.md](docs/ml_model_guide.md) for full details.
 
 ## Privacy
 
-- Your text is analysed in memory and returned in the API response.
+- Your text is analyzed in memory and returned in the API response.
 - **Nothing is persisted** — no database, no logs of text content, no
   cookies.
 - The model runs locally on your machine (or server); no data leaves
@@ -327,7 +327,7 @@ developer guide.
    [docs/update_changelog.md](docs/update_changelog.md)
 6. Submit a pull request
 
-## Licence
+## License
 
 MIT — see [LICENSE](LICENSE).
 

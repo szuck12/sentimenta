@@ -1,5 +1,5 @@
 # backend/app/core/errors.py
-# Application error types and the standardised error envelope used
+# Application error types and the standardized error envelope used
 # by every non-2xx API response.
 
 from fastapi import Request, status
@@ -33,7 +33,7 @@ class EmptyTextError(AppError):
         super().__init__(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             code="empty_text",
-            message="Please provide some text to analyse.",
+            message="Please provide some text to analyze.",
         )
 
 

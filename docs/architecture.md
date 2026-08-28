@@ -25,7 +25,7 @@ Sentimenta is split into three logical layers:
 │  Routes: /api/health, /api/emotions,                      │
 │          /api/analyze, /api/analyze/sentences              │
 │  Dependency injection via module-level singletons         │
-│  Error envelope standardisation                           │
+│  Error envelope standardization                           │
 └───────────┬───────────────────────────┬───────────────────┘
             │                           │
 ┌───────────▼───────────┐  ┌────────────▼──────────────────┐
@@ -44,7 +44,7 @@ Sentimenta is split into three logical layers:
 |-------|-------------|
 | **Experience** | All user-facing rendering, routing, form validation, animation, responsive layout. Never touches PyTorch or model state. |
 | **FastAPI** | HTTP concerns — request validation (Pydantic v2), error envelope, CORS, dependency wiring, lifespan management. |
-| **Intelligence** | Model loading, tokenisation, batch inference, derived metrics (intensity, profile, ranking), sentence splitting. |
+| **Intelligence** | Model loading, tokenization, batch inference, derived metrics (intensity, profile, ranking), sentence splitting. |
 | **Explanation** | Captum attribution, subtoken-to-word aggregation, phrase detection, summary generation. |
 
 ---
@@ -107,13 +107,13 @@ AnalysisService.analyze(text, include_sentences)
     ├── preprocessing.normalize_text()
     ├── preprocessing.split_sentences()     [if include_sentences]
     │
-    ├── EmotionModelService.predict()       ← batch tokenise + forward pass
+    ├── EmotionModelService.predict()       ← batch tokenize + forward pass
     │       └── tokenizer → truncate(256) → model → sigmoid → scores
     │
     ├── metrics.rank_emotions()
     ├── metrics.detected_emotions(threshold=0.30)
     ├── metrics.compute_intensity()         ← 1 - P(neutral)
-    ├── metrics.compute_profile()           ← group sums + normalised shares
+    ├── metrics.compute_profile()           ← group sums + normalized shares
     │
     ├── ExplanationService.explain()
     │       ├── predict_with_offsets()      ← retains offset_mapping
@@ -128,7 +128,7 @@ AnalysisService.analyze(text, include_sentences)
 | Service | File | Owns |
 |---------|------|------|
 | `AnalysisService` | `services/analysis_service.py` | Orchestration, metrics, sentence batching, metadata assembly |
-| `EmotionModelService` | `services/emotion_model_service.py` | Model loading, tokenisation, inference, thread lock |
+| `EmotionModelService` | `services/emotion_model_service.py` | Model loading, tokenization, inference, thread lock |
 | `ExplanationService` | `services/explanation_service.py` | Captum attribution, phrase extraction, summary templates |
 | `preprocessing` | `services/preprocessing.py` | `normalize_text`, `count_words`, `split_sentences` |
 | `metrics` | `services/metrics.py` | `rank_emotions`, `detected_emotions`, `compute_intensity`, `compute_profile` |
@@ -137,19 +137,19 @@ AnalysisService.analyze(text, include_sentences)
 
 ## 4. Data Flow: A Single Analysis Request
 
-1. User types text in `InputCard`, hits "Analyse Emotion".
+1. User types text in `InputCard`, hits "Analyze Emotion".
 2. `useAnalysis.run(text)` calls `api.analyze(text)`.
 3. Frontend sends `POST /api/analyze { text: "...", include_sentences: false }`.
 4. FastAPI validates via `AnalyzeRequest` (Pydantic v2 `Field(min_length=1, max_length=2000)`).
 5. Route handler calls `AnalysisService.analyze(text, include_sentences)`.
 6. `normalize_text` collapses whitespace. Empty after normalization → `EmptyTextError`.
-7. `EmotionModelService.predict([normalized])` tokenises, truncates to 256 tokens, runs the model, applies sigmoid. Returns `dict[Emotion, float]` for all 28 labels.
+7. `EmotionModelService.predict([normalized])` tokenizes, truncates to 256 tokens, runs the model, applies sigmoid. Returns `dict[Emotion, float]` for all 28 labels.
 8. `rank_emotions` sorts descending. `detected_emotions` filters at threshold 0.30.
 9. `compute_intensity` returns `1 - P(neutral)` with a band label.
-10. `compute_profile` sums member scores per group and normalises to shares summing to 1.
+10. `compute_profile` sums member scores per group and normalizes to shares summing to 1.
 11. `ExplanationService.explain` runs Captum `LayerIntegratedGradients` against the primary emotion's output neuron, aggregates token attributions to words, merges adjacent words into phrases, and returns the top 3.
 12. If `include_sentences` is true, `split_sentences` + batch `predict` produce per-sentence results (capped at `sentence_limit=10`).
-13. `AnalyzeResponse` is serialised and returned. Frontend renders the results section with staggered animations.
+13. `AnalyzeResponse` is serialized and returned. Frontend renders the results section with staggered animations.
 
 ---
 
@@ -175,7 +175,7 @@ async def lifespan(app: FastAPI):
     routes._analysis_service = None        # ← released on shutdown
 ```
 
-The model instance is shared across all requests. A `threading.Lock` serialises forward passes so concurrent requests don't corrupt GPU state. This design avoids the per-request overhead of loading ~125M parameters and keeps memory usage constant regardless of traffic.
+The model instance is shared across all requests. A `threading.Lock` serializes forward passes so concurrent requests don't corrupt GPU state. This design avoids the per-request overhead of loading ~125M parameters and keeps memory usage constant regardless of traffic.
 
 ---
 
@@ -224,7 +224,7 @@ Sentimenta is **stateless by design**:
 - No database. No user accounts. No session persistence.
 - User text is processed in-memory during the request lifecycle and never written to disk.
 - No user text appears in server logs (only model IDs, character counts, and latencies are logged).
-- The `Footer` component displays: "Your text is analysed and returned — nothing is stored."
+- The `Footer` component displays: "Your text is analyzed and returned — nothing is stored."
 - CORS origins are restricted to localhost dev ports by default.
 - No API keys or secrets are required at runtime.
 
@@ -262,7 +262,7 @@ class EmptyTextError(AppError):
     def __init__(self) -> None:
         super().__init__(
             status_code=422, code="empty_text",
-            message="Please provide some text to analyse.",
+            message="Please provide some text to analyze.",
         )
 ```
 

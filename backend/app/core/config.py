@@ -22,7 +22,7 @@ class Settings(BaseSettings):
         min_text_chars: Minimum accepted input length after trimming.
         emotion_threshold: Minimum sigmoid probability for an emotion
             to be listed as "detected" alongside the primary emotion.
-        sentence_limit: Maximum number of sentences analysed in
+        sentence_limit: Maximum number of sentences analyzed in
             sentence-level mode (bounds inference latency).
         enable_attribution: Master switch for Captum token
             attribution. When disabled the explanation falls back to

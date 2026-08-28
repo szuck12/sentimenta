@@ -100,7 +100,7 @@ highest-scoring label) and `emotions` (all labels above threshold).
 |-------|-------|-------------|
 | admiration | 👏 | Recognising someone or something as impressive or excellent. |
 | amusement | 😄 | Finding something funny or entertaining. |
-| approval | 👍 | Expressing agreement or a favourable judgement. |
+| approval | 👍 | Expressing agreement or a favorable judgement. |
 | caring | 🤗 | Showing warmth, concern, or compassion for others. |
 | desire | ✨ | Hoping for or wanting something to happen. |
 | excitement | 🤩 | High energy and eager anticipation. |
@@ -118,7 +118,7 @@ highest-scoring label) and `emotions` (all labels above threshold).
 | anger | 😠 | Strong feelings of displeasure or hostility. |
 | annoyance | 😒 | Mild irritation or being bothered by something. |
 | disappointment | 😞 | Feeling let down when expectations are not met. |
-| disapproval | 👎 | Expressing disagreement or disfavour. |
+| disapproval | 👎 | Expressing disagreement or disfavor. |
 | disgust | 🤢 | Feeling repelled or strongly put off. |
 | embarrassment | 😳 | Feeling awkward, self-conscious, or ashamed. |
 | fear | 😨 | Feeling afraid or worried about danger. |
@@ -206,7 +206,7 @@ probs = torch.sigmoid(logits)   # (batch, 28)
 
 - The model outputs raw logits. Sigmoid converts them to independent
   probabilities in [0, 1].
-- A `threading.Lock` serialises forward passes for thread safety.
+- A `threading.Lock` serializes forward passes for thread safety.
 - The `forward_locked` method is exposed for Captum attribution, which
   runs many small forward passes with gradients enabled.
 
@@ -235,11 +235,11 @@ When text is truncated:
 
 - The `metadata.truncated_tokens` field is `true`.
 - The model processes only the first 256 tokens (roughly the first
-  400–500 words, depending on tokenisation).
+  400–500 words, depending on tokenization).
 - The resulting probabilities may not reflect the full emotional
   content of the text.
 - The `exceeds_token_budget` method checks this without running the
-  model (tokenises without truncation and compares length).
+  model (tokenizes without truncation and compares length).
 
 Sentimenta does **not** reject long text — it processes what fits and
 flags the truncation. This is a deliberate choice: users can still get
@@ -282,7 +282,7 @@ The GoEmotions dataset is drawn from Reddit comments. This introduces:
 ### Cultural and Demographic Limitations
 
 - Emotional expression varies across cultures, languages, and
-  demographics. The model may not generalise well to non-Western or
+  demographics. The model may not generalize well to non-Western or
   non-English text.
 - Sarcasm, irony, and implicit emotion are poorly handled. "Great. Just
   great." may be classified as `admiration` rather than `disapproval`.
@@ -323,11 +323,11 @@ The 27 non-neutral emotions are summed within each group:
 - **Cognitive**: sum of the 4 cognitive-group emotion scores.
 - **Neutral**: the single neutral label score.
 
-Shares are normalised to sum to 1.0 so the frontend can render them as
+Shares are normalized to sum to 1.0 so the frontend can render them as
 parts of a whole (e.g. a bar chart or pie chart).
 
 Because sigmoid outputs do not sum to 1 (multi-label), the raw group
-sums can exceed 1. The normalised shares are what the UI displays.
+sums can exceed 1. The normalized shares are what the UI displays.
 
 ---
 
@@ -338,7 +338,7 @@ to identify which words contributed most toward the primary emotion.
 
 ### How It Works
 
-1. The input is tokenised with offset mappings retained.
+1. The input is tokenized with offset mappings retained.
 2. A baseline is constructed by replacing all tokens with the pad token.
 3. Integrated gradients interpolates from the baseline to the actual
    input across `n_steps=16` steps (configurable via
@@ -349,7 +349,7 @@ to identify which words contributed most toward the primary emotion.
    aggregated from subword tokens back to words using offset mappings.
 6. Adjacent words with positive attribution are merged into phrases.
 7. The top 3 phrases (by attribution weight) are returned as
-   `EvidenceSignal` objects with normalised weights.
+   `EvidenceSignal` objects with normalized weights.
 
 ### Configuration
 
@@ -378,7 +378,7 @@ ONNX Runtime could reduce latency by 2–3x on CPU. This is tracked in
 
 ### INT8 Quantisation
 
-Post-training quantisation to INT8 would reduce model size from ~500 MB
+Post-training quantization to INT8 would reduce model size from ~500 MB
 to ~125 MB and speed up inference, with a modest accuracy trade-off.
 This would make deployment more accessible on resource-constrained
 environments.

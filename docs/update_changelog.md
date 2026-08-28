@@ -1,6 +1,6 @@
 # Changelog Maintenance Guide
 
-`CHANGELOG.md` records all user-facing changes to Sentimenta, organised
+`CHANGELOG.md` records all user-facing changes to Sentimenta, organized
 by version and category. This document defines the format, rules, and
 process for maintaining it.
 
@@ -86,8 +86,8 @@ Modifications to existing functionality that are not fixes.
 
 Examples:
 - Updated model threshold from 0.5 to 0.30.
-- Changed the UI colour palette.
-- Refactored service layer (if user-visible behaviour changed).
+- Changed the UI color palette.
+- Refactored service layer (if user-visible behavior changed).
 
 ### Fixed
 
@@ -122,15 +122,15 @@ Examples:
 | New API endpoint | Yes | Added |
 | New response field | Yes | Added |
 | New UI component | Yes | Added |
-| Changed behaviour of existing feature | Yes | Changed |
+| Changed behavior of existing feature | Yes | Changed |
 | Bug fix | Yes | Fixed |
 | Security fix | Yes | Security |
 | New test infrastructure | Yes | Added |
 | Documentation update | Yes | Added or Changed |
 | Performance improvement (user-visible) | Yes | Changed |
-| Internal refactoring (no behaviour change) | No | — |
+| Internal refactoring (no behavior change) | No | — |
 | Whitespace-only changes | No | — |
-| Dependency bump without behaviour change | No | — |
+| Dependency bump without behavior change | No | — |
 | Typo fixes in comments | No | — |
 | CI configuration changes | No | — |
 
@@ -177,7 +177,7 @@ changelog:
 ```markdown
 ### Changed
 - Refactored AnalysisService to use composition over inheritance.
-  (This is internal — don't include unless it changed user behaviour.)
+  (This is internal — don't include unless it changed user behavior.)
 ```
 
 ---
@@ -233,10 +233,10 @@ The current changelog as of v0.1.0:
 - Emotional profile grouping: positive/affiliative, negative/heavy,
   cognitive/ambiguous, neutral.
 - Multi-sentence analysis with emotional journey timeline.
-- Collapsible full 28-emotion spectrum visualisation.
+- Collapsible full 28-emotion spectrum visualization.
 - Example texts for immediate exploration.
 - Backend test suite: unit tests, API tests (stub model), real-model
-  integration tests (14 edge-case and behaviour tests).
+  integration tests (14 edge-case and behavior tests).
 - Frontend component tests with Vitest and React Testing Library.
 - CI configuration (GitHub Actions).
 - Project documentation: architecture, API docs, testing guide,
