@@ -2,13 +2,16 @@
 # Singleton wrapper around the Hugging Face GoEmotions model. Loads
 # the tokenizer and model exactly once and exposes batch inference.
 
+from __future__ import annotations
+
 import logging
 import threading
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
-import torch
-from transformers import AutoModelForSequenceClassification, AutoTokenizer
-from transformers.tokenization_utils_base import BatchEncoding
+if TYPE_CHECKING:
+    import torch
+    from transformers.tokenization_utils_base import BatchEncoding
 
 from ..core.config import Settings
 from ..core.emotions import Emotion
@@ -54,6 +57,8 @@ class EmotionModelService:
     """
 
     def __init__(self, settings: Settings) -> None:
+        import torch
+
         self.settings = settings
         self.tokenizer = None
         self.model = None
@@ -82,6 +87,11 @@ class EmotionModelService:
                 chained so operators see the root cause.
         """
         try:
+            from transformers import (
+                AutoModelForSequenceClassification,
+                AutoTokenizer,
+            )
+
             logger.info("Loading model %s ...", self.settings.model_id)
             self.tokenizer = AutoTokenizer.from_pretrained(
                 self.settings.model_id
@@ -175,6 +185,8 @@ class EmotionModelService:
             RuntimeError: If the forward pass fails.
         """
         try:
+            import torch
+
             ctx = (
                 torch.no_grad() if not needs_grad else torch.enable_grad()
             )

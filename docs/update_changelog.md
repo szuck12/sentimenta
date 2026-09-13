@@ -204,9 +204,11 @@ Release 0.2.1 — fix intensity calculation for neutral-dominant text
 
 1. Determine the bump type based on the changes since the last release.
 2. Update `Settings.version` in `backend/app/core/config.py`.
-3. Update the version in `frontend/package.json`.
+3. Update the version in `frontend/package.json` (and its
+   `package-lock.json`).
 4. Write the new section in `CHANGELOG.md` with today's date.
-5. Update `README.md` version badge.
+5. Update the version shown in `README.md` and the supported-versions
+   table in `SECURITY.md`.
 6. Commit: `Release X.Y.Z — brief summary`.
 7. Tag: `git tag vX.Y.Z`.
 8. Push: `git push origin main --tags`.
@@ -215,10 +217,11 @@ Release 0.2.1 — fix intensity calculation for neutral-dominant text
 
 ## Current Changelog
 
-The current changelog as of v0.1.0:
+The initial 1.0.0 release entry (see [CHANGELOG.md](../CHANGELOG.md) for
+the current file):
 
 ```markdown
-## [0.1.0] - 2026-08-25
+## [1.0.0] - 2026-08-25
 
 ### Added
 

@@ -43,7 +43,7 @@ class Settings(BaseSettings):
     )
 
     app_name: str = "Sentimenta API"
-    version: str = "0.1.0"
+    version: str = "1.0.1"
 
     cors_origins: list[str] = [
         "http://localhost:5173",

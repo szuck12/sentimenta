@@ -1,9 +1,9 @@
 # Testing Guide
 
 Sentimenta uses a layered testing strategy that separates fast,
-deterministic unit tests from slower integration tests that require real
-model inference. The goal is to catch regressions early while keeping
-the feedback loop short for day-to-day development.
+deterministic tests from slower integration tests that require real model
+inference. The goal is to catch regressions early while keeping the
+feedback loop short for day-to-day development.
 
 ---
 
@@ -12,10 +12,38 @@ the feedback loop short for day-to-day development.
 | Layer | Where | Framework | Speed | External deps |
 |-------|-------|-----------|-------|---------------|
 | **Unit** | `backend/tests/unit/` | pytest | < 1 s | None |
-| **API / Integration** | `backend/tests/api/` | pytest + httpx | < 2 s | None (stub services) |
-| **Model** | `backend/tests/model/` | pytest + PyTorch | 10–30 s | Hugging Face model |
-| **Component** | `frontend/tests/components/` | Vitest + RTL | < 3 s | jsdom |
-| **E2E** | `tests/e2e/` | Playwright | 30–60 s | Both servers running |
+| **API / Integration** | `backend/tests/api/` | pytest + httpx | < 1 s | None (stub services) |
+| **Service** | `backend/tests/services/` | pytest | < 1 s | None (fake model) |
+| **Model** | `backend/tests/model/` | pytest + PyTorch | 10–30 s | Hugging Face model, gated by `--runmodel` |
+| **Component** | `frontend/tests/` | Vitest + RTL | < 10 s | jsdom |
+| **E2E** | `tests/e2e/` | Playwright | 30–60 s | Both servers running (planned) |
+
+Fast tests (unit, API, service, component) must not import PyTorch. The
+model and explanation services import `torch`/`captum` lazily so that
+importing the application for tests stays lightweight.
+
+---
+
+## Running the Suites
+
+```bash
+# Backend — fast suites
+cd backend
+../.venv/bin/pytest tests/unit tests/api tests/services -v
+
+# Backend — real model inference
+../.venv/bin/pytest tests/model -v --runmodel
+
+# Backend — coverage gate
+../.venv/bin/pytest tests/unit tests/api tests/services \
+  --cov=app --cov-report=term-missing --cov-fail-under=85
+
+# Frontend
+cd frontend
+npm run test            # single run
+npm run test:watch      # watch mode
+npm run test:coverage   # 80% coverage gate
+```
 
 ---
 
@@ -23,33 +51,26 @@ the feedback loop short for day-to-day development.
 
 **Location**: `backend/tests/unit/`
 **Runner**: `pytest`
-**Dependencies**: None — pure function tests, no model, no HTTP.
+**Dependencies**: None — pure function and configuration tests.
 
 ### What Is Tested
 
-#### Preprocessing (`test_preprocessing.py`)
-
-- `normalize_text`: whitespace collapse, emoji preservation, empty string.
-- `count_words`: single word, multiple words.
-- `split_sentences`: simple splits, newline separation, blank paragraphs
-  ignored, single sentence, long text (10 sentences), unicode
-  punctuation, empty input.
-
-#### Metrics (`test_metrics.py`)
-
-- `rank_emotions`: descending order, tie-breaking (alphabetical).
-- `detected_emotions`: threshold filtering at 0.25 and 0.90.
-- `compute_intensity`: low band (neutral=0.90), moderate band
-  (neutral=0.50), high band (neutral=0.05).
-- `compute_profile`: shares sum to 1.0, positive-dominant,
-  negative-dominant, all-zero edge case, all 28 labels present.
-
-### Running
-
-```bash
-cd backend
-../.venv/bin/pytest tests/unit/ -v
-```
+- **Preprocessing** (`test_preprocessing.py`) — whitespace collapsing,
+  emoji preservation, empty input, word counting, and sentence splitting
+  (punctuation, newlines, quotes, abbreviations, unicode).
+- **Metrics** (`test_metrics.py`) — ranking and deterministic
+  tie-breaking, threshold filtering (inclusive boundary), intensity
+  bands and boundaries, and profile aggregation (shares sum to one,
+  group dominance, all-zero and all-28 edge cases).
+- **Taxonomy** (`test_emotions.py`) — exactly 28 unique labels, complete
+  emoji/description metadata, group membership covering every label
+  exactly once, and stable enum order.
+- **Settings** (`test_config.py`) — defaults, environment overrides, CORS
+  parsing, and `lru_cache` caching.
+- **Error envelope** (`test_errors.py`) — each `AppError` subclass, the
+  validation summarizer, and the sanitized 500 handler.
+- **Schemas** (`test_schemas.py`) — request length bounds, probability
+  bounds, attribution weight bounds, and defaults.
 
 ---
 
@@ -62,37 +83,41 @@ cd backend
 
 ### What Is Tested
 
-- `GET /api/health` — status code, response shape, `model_loaded` is boolean.
-- `GET /api/emotions` — count=28, first emotion is "admiration", correct group.
-- `POST /api/analyze` — success with valid text, correct primary emotion
-  label from stub scores, response shape validation.
-- `POST /api/analyze` — empty text → 422 with error envelope.
-- `POST /api/analyze` — text exceeding limit → 422.
-- `POST /api/analyze` — malformed JSON → 422 with error envelope.
-- `POST /api/analyze` — missing `text` field → 422.
-- `POST /api/analyze` — wrong type for `text` (integer) → 422.
-- `POST /api/analyze/sentences` — success with valid text.
-- `POST /api/analyze` with `include_sentences: true` — sentences present
-  in response.
+- `GET /api/health` — status code, response shape, `model_loaded`.
+- `GET /api/emotions` — count = 28, first label, groups, descriptions.
+- `POST /api/analyze` — success, all 28 ranked emotions, metadata shape,
+  empty/over-limit/missing/wrong-type input → 422, malformed JSON → 422.
+- `POST /api/analyze/sentences` — success, empty text, over-limit text.
+- Unknown routes → 404.
+- CORS — preflight and response headers for an allowed origin.
+- Error paths (`test_errors.py`) — domain errors use the envelope;
+  unexpected exceptions are sanitized and never leak internals.
 
 ### Test Infrastructure
 
-The `conftest.py` provides:
+`backend/tests/conftest.py` provides:
 
-- **`StubAnalysisService`**: Subclass of `AnalysisService` that overrides
-  `analyze` and `analyze_sentences` with deterministic responses built
-  from hardcoded `_STUB_SCORES`. Never imports PyTorch.
-- **`_StubModelService`**: Bare object with `is_loaded = True` for
-  health endpoint tests.
-- **`client` fixture**: `httpx.AsyncClient` wired to a fresh FastAPI
-  app with all three dependency overrides applied.
+- **`StubAnalysisService`** — deterministic responses with no PyTorch.
+- **`_StubModelService`** — bare object with `is_loaded = True`.
+- **`app`** — a fresh FastAPI app with all three dependencies overridden.
+- **`client`** — an `httpx.AsyncClient` bound to that app.
 
-### Running
+---
 
-```bash
-cd backend
-../.venv/bin/pytest tests/api/ -v
-```
+## Backend Service Tests
+
+**Location**: `backend/tests/services/`
+**Runner**: `pytest`
+**Dependencies**: A fake model service; no PyTorch.
+
+- **`test_analysis_service.py`** — orchestration: primary/ranked
+  emotions, threshold filtering, empty-text and model-unavailable errors,
+  metadata counts/latency, truncation flag, sentence limit, and the
+  attribution flag.
+- **`test_explanation_service.py`** — probability fallbacks (attribution
+  disabled, model not loaded, attribution raised), summary wording and
+  rounding, and word/phrase aggregation from token attributions
+  (merging, cutoff, zero-length offsets, top-three cap).
 
 ---
 
@@ -100,84 +125,62 @@ cd backend
 
 **Location**: `backend/tests/model/`
 **Runner**: `pytest` with `pytest.mark.model`
-**Dependencies**: Real Hugging Face model (downloads ~500 MB on first run,
-cached at `~/.cache/huggingface`).
+**Dependencies**: Real Hugging Face model (~500 MB, cached at
+`~/.cache/huggingface`).
+
+Model tests are skipped unless `--runmodel` is passed. The flag is added
+in `backend/conftest.py`; `pytest_collection_modifyitems` marks model
+tests skipped otherwise.
 
 ### What Is Tested
 
-All tests in `TestModelInference` and `TestSentenceAnalysis` verify:
-
-1. **Probability range** — every score is a finite float in [0, 1].
-2. **Relative ordering** — known emotional texts produce the expected
-   dominant emotion (excitement text → `EXCITEMENT > SADNESS`, sadness
-   text → `SADNESS > JOY`, etc.).
-3. **Multi-label behavior** — mixed-emotion text produces high scores
-   for multiple labels simultaneously.
-4. **All 28 labels returned** — the output contains exactly the 28
-   `Emotion` enum members.
-5. **Batch inference** — multiple texts processed in one call.
-6. **Edge cases** — empty batch, punctuation-heavy input, emoji input,
-   unicode text, empty string.
-7. **Truncation** — long text (500 words) is flagged as exceeding token
-   budget; short text is not.
-8. **Sentence-level** — two contrasting sentences produce different
-   dominant emotions.
+- Probability range (finite, in `[0, 1]`) and all 28 labels returned.
+- Relative ordering for known emotional texts and batch order.
+- Multi-label behaviour and deterministic repeated inference.
+- `predict_with_offsets` — scores, encoding keys, and truncation flag.
+- `forward_locked` — 28-wide sigmoid output for attribution.
+- Token-budget boundary consistency with the tokenizer.
+- `id2label` matching the `Emotion` enum.
+- Edge cases: empty string/batch, punctuation-heavy, emoji, unicode, and
+  truncation of long text.
 
 ### Corpus Fixture
 
-The file `tests/fixtures/go_emotions_corpus.json` contains:
-
-- **`emotion_samples`**: 28 entries, one per GoEmotions label, each
-  with a representative `text` and `expected` label. Used as a reference
-  for validating model behavior against expected emotions.
-- **`adversarial_samples`**: 18 entries covering sarcasm, negation,
-  mixed emotions, empty input, whitespace-only, single word, emoji-only,
-  punctuation-heavy, repetition, numbers, URLs, unicode, multiline,
-  neutral, implicit sarcasm, ambiguous, repeated emoji, and
-  multi-sentence inputs.
-
-### Running
-
-```bash
-cd backend
-../.venv/bin/pytest tests/model/ -v --runmodel
-```
-
-The `--runmodel` flag is a custom marker; check `conftest.py` or
-`pyproject.toml` for its implementation. Tests in this directory are
-marked with `pytestmark = pytest.mark.model` so they can be excluded
-from fast test runs.
+`tests/fixtures/go_emotions_corpus.json` contains representative and
+adversarial samples used as reference material for model behaviour.
 
 ---
 
 ## Frontend Component Tests
 
-**Location**: `frontend/tests/components/`
-**Runner**: Vitest with jsdom environment
+**Location**: `frontend/tests/`
+**Runner**: Vitest with jsdom
 **Dependencies**: React Testing Library, `@testing-library/user-event`
 
-### What Is Tested (`InputCard.test.tsx`)
+Global setup (`frontend/tests/setup.ts`) loads the jest-dom matchers,
+runs DOM cleanup after each test, and shims `matchMedia`,
+`scrollIntoView`, and `scrollTo` for jsdom.
 
-- Renders textarea with placeholder text.
-- Renders "Analyze Emotion" button.
-- Displays character count.
-- Shows example chips (Excitement, Neutral, etc.).
-- Populates textarea on example chip click.
-- Disables button when `status="loading"`.
-- Shows "Start over" button when `status="success"`.
+### What Is Tested
 
-### Running
+- **API client** (`lib/api.test.ts`) — request shaping, GET/POST paths,
+  server-error messages, and network failures.
+- **Utilities** (`lib/utils.test.ts`) — `cn` class merging.
+- **Hook** (`hooks/useAnalysis.test.tsx`) — idle → loading →
+  success/error lifecycle and reset.
+- **UI primitives** (`components/ui/`) — Button, Card, Badge.
+- **Feature components** — InputCard (validation, examples, counters,
+  submit, reset, loading/disabled states), Header (active route, mobile
+  menu), Footer, LoadingState.
+- **Result cards** (`components/results/`) — PrimaryEmotionCard,
+  EmotionMixCard, ExplanationCard (signals + fallback), JourneyCard
+  (single-sentence guard, truncation), SpectrumCard (expand/collapse),
+  and ResultsSection composition.
+- **Pages and routing** — Home (submit + error), Emotions (loading +
+  grouped taxonomy), HowItWorks, and App navigation.
 
-```bash
-cd frontend
-npm run test
-```
-
-Or in watch mode:
-
-```bash
-npm run test:watch
-```
+Tests stub `fetch` with `vi.stubGlobal` and shared payloads from
+`frontend/tests/fixtures.ts`.
 
 ---
 
@@ -187,35 +190,9 @@ npm run test:watch
 **Runner**: Playwright
 **Dependencies**: Both backend and frontend servers running.
 
-### Planned Test Scenarios
-
-The 8 planned E2E test scenarios from the project spec:
-
-1. **Happy path** — type text, click Analyze, verify primary emotion
-   card renders with label and score.
-2. **Example chip** — click an example chip, verify textarea populates,
-   submit, verify results appear.
-3. **Empty submission** — submit with no text, verify validation error.
-4. **Over-limit text** — paste text exceeding 2,000 chars, verify
-   character counter turns red and button is disabled.
-5. **Loading state** — submit text, verify animated loading dots and
-   cycling messages appear before results.
-6. **Start over** — after a successful analysis, click "Start over",
-   verify results clear and textarea resets.
-7. **Navigation** — click "How It Works" link, verify page renders with
-   the 4-step explanation. Click "Emotions" link, verify 28 emotions
-   render.
-8. **Sentence analysis** — submit multi-sentence text with
-   `include_sentences`, verify the Emotional Journey card appears with
-   per-sentence badges.
-
-### Running (once configured)
-
-```bash
-cd frontend
-npm run build
-npx playwright test
-```
+Planned scenarios are listed in `tests/README.md` and the project TODO:
+happy path, example chip, empty submission, over-limit text, loading
+state, start over, navigation, and sentence analysis.
 
 ---
 
@@ -224,96 +201,65 @@ npx playwright test
 ### Backend Unit Test
 
 1. Create or open a file in `backend/tests/unit/`.
-2. Import the function under test from `app.services.*`.
-3. Write functions named `test_*` with deterministic inputs.
-4. Assert expected outputs. Avoid randomness or external I/O.
-
-```python
-def test_my_new_function() -> None:
-    result = my_function("input")
-    assert result == "expected"
-```
+2. Import the function under test from `app.*`.
+3. Write deterministic `test_*` functions and assert exact outputs.
 
 ### Backend API Test
 
-1. Add a function to `backend/tests/api/test_routes.py`.
+1. Add a function to `backend/tests/api/`.
 2. Accept the `client: httpx.AsyncClient` fixture.
-3. Make a request to the endpoint.
-4. Assert status code and response body.
+3. Make a request and assert status code and body.
 
-```python
-async def test_my_endpoint(client: httpx.AsyncClient) -> None:
-    resp = await client.post("/api/analyze", json={"text": "hello"})
-    assert resp.status_code == 200
-```
+### Backend Service Test
+
+1. Add a file under `backend/tests/services/`.
+2. Use a fake model service (see `test_analysis_service.py`).
+3. Construct the real service and assert its orchestration.
 
 ### Backend Model Test
 
-1. Add a method to `TestModelInference` or `TestSentenceAnalysis` in
-   `backend/tests/model/test_emotion_model.py`.
+1. Add a method to `backend/tests/model/test_emotion_model.py`.
 2. Accept the `loaded_service` fixture.
-3. Call `loaded_service.predict(...)` and assert relative ordering or
-   probability ranges.
-4. Mark the test file with `pytestmark = pytest.mark.model`.
+3. Assert relative ordering or probability ranges. The module is already
+   marked with `pytestmark = pytest.mark.model`.
 
 ### Frontend Component Test
 
-1. Create or open a file in `frontend/tests/components/`.
-2. Import the component and `render`/`screen` from RTL.
-3. Use `userEvent` for interactions.
-4. Assert DOM state.
-
-```typescript
-it('renders correctly', () => {
-  render(<MyComponent />)
-  expect(screen.getByText('expected text')).toBeInTheDocument()
-})
-```
+1. Create a file under `frontend/tests/` mirroring the source path.
+2. Render with RTL and interact with `userEvent`.
+3. Stub `fetch` for anything that reaches the API client.
 
 ---
 
 ## Deterministic Testing Philosophy
 
-All fast tests (unit, API, component) must be:
+All fast tests must be:
 
-- **Deterministic** — same inputs produce same outputs, every run.
-- **No randomness** — no `random`, no `torch.manual_seed` needed, no
-  stochastic sampling.
-- **No external dependencies** — no network calls, no model downloads,
-  no disk I/O beyond fixture reads.
-- **No shared state** — each test function is independent; fixtures
-  create fresh instances.
+- **Deterministic** — same inputs, same outputs, every run.
+- **Dependency-free** — no network, no model downloads, no disk I/O
+  beyond fixture reads.
+- **Isolated** — each test builds fresh state; no shared mutations.
 
-The model tests are the exception: they require the real Hugging Face
-model and are isolated behind the `model` marker so they don't slow down
-the default test run.
+The model tests are the deliberate exception and are kept behind the
+`model` marker.
 
 ---
 
-## Running All Tests
+## Coverage
 
-```bash
-# Fast tests only (unit + API + component)
-cd backend && ../.venv/bin/pytest tests/unit/ tests/api/ -v
-cd frontend && npm run test
-
-# With model inference
-cd backend && ../.venv/bin/pytest tests/ -v --runmodel
-
-# Everything (once E2E is configured)
-npm run build && npx playwright test
-```
+- **Backend**: `pytest-cov`, gated at 85% over the `app` package
+  (excluding `app/services/emotion_model_service.py`).
+- **Frontend**: `@vitest/coverage-v8`, gated at 80% over `src/`.
 
 ---
 
 ## CI Integration
 
-The GitHub Actions pipeline runs:
+`.github/workflows/ci.yml` runs three jobs:
 
-1. Backend lint (`ruff check`), type check (`mypy`), fast tests.
-2. Frontend lint (`eslint`), type check (`tsc --noEmit`), component
-   tests (`vitest run`).
-3. Model tests in a separate job (requires model download cache).
-
-Model test results are cached via `~/.cache/huggingface` to avoid
-re-downloading ~500 MB on every run.
+1. **Frontend** — `npm ci`, lint, typecheck, `test:coverage`, build.
+2. **Backend** — install dev requirements, `ruff`, `mypy`, and the fast
+   suite with the 85% coverage gate.
+3. **Model integration** — after the backend job, run
+   `pytest tests/model -v --runmodel` with the Hugging Face cache
+   restored between runs.

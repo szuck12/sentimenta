@@ -3,11 +3,14 @@
 # attribution mapped back to words/phrases, plus factual,
 # template-generated summaries built strictly from model outputs.
 
+from __future__ import annotations
+
 import logging
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
-import torch
-from captum.attr import LayerIntegratedGradients
+if TYPE_CHECKING:
+    import torch
 
 from ..core.config import Settings
 from ..core.emotions import Emotion
@@ -146,6 +149,9 @@ class ExplanationService:
         """
         models = self.models
         assert models.model is not None and models.tokenizer is not None
+
+        import torch
+        from captum.attr import LayerIntegratedGradients
 
         prediction = models.predict_with_offsets(text)
         encoding = prediction.encoding

@@ -6,16 +6,20 @@
 
 ## Done
 
-- [x] 2026-08-25 — Initial implementation: backend, frontend, model
-      integration, explanation, tests, docs, CI (#backend, #frontend,
-      #model, #test, #docs, #infra)
+- [x] 2026-09-13 — v1.0.1 — repository hardening: expanded backend and
+      frontend test suites (coverage gates, `--runmodel` gate, lazy
+      PyTorch imports), corrected CI pipeline, expanded README and
+      security policy, and dependency-update automation (#test, #docs,
+      #infra)
+- [x] 2026-08-25 — v1.0.0 — Initial implementation: backend, frontend,
+      model integration, explanation, tests, docs, CI (#backend,
+      #frontend, #model, #test, #docs, #infra)
 
 ## High Priority
 
 (Important changes that should be done soon.)
 
 - [ ] Add E2E tests with Playwright covering the full analyze flow (#test)
-- [ ] Verify CI pipeline runs correctly in GitHub Actions (#infra)
 
 ## Medium Priority
 

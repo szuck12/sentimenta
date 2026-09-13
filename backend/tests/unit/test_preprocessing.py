@@ -68,3 +68,52 @@ def test_split_sentences_unicode_punctuation() -> None:
 def test_split_sentences_empty() -> None:
     assert split_sentences("") == []
     assert split_sentences("   ") == []
+
+
+def test_normalize_strips_surrounding_whitespace() -> None:
+    assert normalize_text("\n  hello  \t") == "hello"
+
+
+def test_normalize_collapses_multiple_spaces() -> None:
+    assert normalize_text("a    b") == "a b"
+
+
+def test_normalize_preserves_punctuation() -> None:
+    assert normalize_text("Wait... what?!") == "Wait... what?!"
+
+
+def test_count_words_empty_and_whitespace() -> None:
+    assert count_words("") == 0
+    assert count_words("   \n\t ") == 0
+
+
+def test_count_words_with_punctuation() -> None:
+    assert count_words("hello, world!") == 2
+
+
+def test_split_sentences_question_and_exclamation() -> None:
+    parts = split_sentences("Are you sure? Yes I am!")
+    assert parts == ["Are you sure?", "Yes I am!"]
+
+
+def test_split_sentences_strips_each_part() -> None:
+    parts = split_sentences("  First.   Second.  ")
+    assert parts == ["First.", "Second."]
+
+
+def test_split_sentences_lowercase_after_period_not_split() -> None:
+    # A period followed by a lowercase word is treated as one sentence.
+    parts = split_sentences("see e.g. this")
+    assert parts == ["see e.g. this"]
+
+
+def test_split_sentences_quote_after_period_splits() -> None:
+    parts = split_sentences('He left. "Goodbye" was all he said.')
+    assert len(parts) == 2
+
+
+def test_split_sentences_multiple_punctuation() -> None:
+    parts = split_sentences("What?! Really?!")
+    assert len(parts) >= 1
+    assert all(part.strip() for part in parts)
+

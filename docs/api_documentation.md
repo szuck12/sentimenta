@@ -84,7 +84,7 @@ Returns service liveness and model status.
 ```json
 {
   "status": "ok",
-  "version": "0.1.0",
+  "version": "1.0.1",
   "model_id": "SamLowe/roberta-base-go_emotions",
   "model_loaded": true
 }

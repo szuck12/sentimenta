@@ -176,12 +176,11 @@ The two files serve different audiences:
 
 ## Current TODO.md Snapshot
 
-The following items are currently tracked (as of v0.1.0):
+The following items are currently tracked (as of v1.0.1):
 
 ### High Priority
 
 - [ ] Add E2E tests with Playwright covering the full analyze flow (#test)
-- [ ] Add GitHub Actions CI pipeline (#infra)
 
 ### Medium Priority
 

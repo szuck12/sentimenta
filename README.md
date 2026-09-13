@@ -1,6 +1,6 @@
 # Sentimenta
 
-Current version: **0.1.0** — [Changelog](CHANGELOG.md)
+Current version: **1.0.1** — [Changelog](CHANGELOG.md)
 
 Understand what your words are feeling.
 
@@ -14,6 +14,10 @@ No paid APIs. No cloud ML services. The model runs entirely locally
 inside the backend.
 
 ## Features
+
+Each request returns more than a single label: it returns a probability
+for every emotion, the words that drove the strongest reading, and a set
+of derived metrics that make the result easy to interpret. Highlights:
 
 - **28 emotion labels** — not just positive/negative. Joy, anger,
   curiosity, gratitude, and 24 others.
@@ -73,6 +77,25 @@ inside the backend.
 | Classification | Multi-label (sigmoid per emotion) |
 | License | MIT |
 
+GoEmotions is a dataset of roughly 58,000 Reddit comments, each
+annotated by human raters with one or more of 27 emotion labels (or
+"neutral"). `SamLowe/roberta-base-go_emotions` fine-tunes RoBERTa-base —
+a 12-layer, 768-dimensional transformer encoder — on that data.
+
+Because a comment can express several feelings at once, the model is
+trained for **multi-label** classification: a sigmoid activation is
+applied to each of the 28 output logits independently, so the scores are
+independent probabilities rather than a distribution that sums to 1. A
+comment can therefore score high for both joy and nervousness at the
+same time. Sentimenta reports the highest-scoring label as the primary
+emotion and lists every label at or above a tunable detection threshold
+(default 0.30) as detected.
+
+The input is truncated to a 256-token budget; longer text is still
+analyzed, but the response flags `truncated_tokens: true`. Weights load
+once at startup and inference runs inside the FastAPI process, so no text
+ever leaves the server.
+
 ## Architecture
 
 ```
@@ -98,7 +121,27 @@ inside the backend.
 See [docs/architecture.md](docs/architecture.md) for the full system
 design.
 
+A request flows through five stages. The text is first normalized
+(whitespace collapsed) and tokenized with the model's tokenizer,
+truncated to the token budget. A single forward pass produces 28 sigmoid
+probabilities. From those probabilities the service derives the
+intensity metric and the grouped emotional profile, then selects the
+primary emotion and any secondary emotions above the threshold. When
+attribution is enabled, Captum integrated gradients runs additional
+forward/backward passes against the primary emotion's output neuron and
+maps sub-token attributions back to words and adjacent-word phrases. A
+module-level lock serializes those passes because the model is a shared
+singleton. Sentence mode repeats the scoring step per sentence, capped by
+`SENTIMENTA_SENTENCE_LIMIT`.
+
 ## Project Structure
+
+The backend separates a thin API layer (`backend/app/api`), domain
+configuration and taxonomy (`core`), the public contract (`schemas`),
+and the analysis pipeline (`services`). The frontend separates generic
+UI primitives (`components/ui`), feature and result components
+(`components`, `components/results`), the API client and shared types
+(`lib`), stateful logic (`hooks`), and routed pages (`pages`).
 
 ```
 sentimenta/
@@ -130,10 +173,14 @@ sentimenta/
 │   │       ├── metrics.py               # Intensity, profile
 │   │       └── preprocessing.py         # Text normalization
 │   ├── tests/
-│   │   ├── unit/             # Fast pure-logic tests
-│   │   ├── api/              # HTTP round-trip tests (stubbed model)
-│   │   └── model/            # Real inference tests
-│   ├── requirements.txt
+│   │   ├── unit/             # Pure-logic tests (metrics, taxonomy, schemas)
+│   │   ├── api/              # HTTP round-trip + error tests (stub model)
+│   │   ├── services/         # Orchestration + explanation fallback tests
+│   │   └── model/            # Real inference tests (--runmodel)
+│   ├── conftest.py           # --runmodel gate for model tests
+│   ├── requirements.txt      # Runtime dependencies
+│   ├── requirements-dev.txt  # Runtime + test/lint tooling
+│   ├── .coveragerc           # Backend coverage configuration
 │   └── pytest.ini
 │
 ├── docs/
@@ -171,7 +218,9 @@ sentimenta/
 │   │       ├── Home.tsx
 │   │       ├── HowItWorks.tsx
 │   │       └── Emotions.tsx
-│   ├── tests/
+│   ├── tests/                # Vitest + React Testing Library suites
+│   ├── eslint.config.js      # ESLint 9 flat config
+│   ├── vitest.config.ts      # jsdom environment + coverage gate
 │   ├── package.json
 │   ├── vite.config.ts
 │   └── tailwind.config.js
@@ -196,8 +245,17 @@ sentimenta/
 cd sentimenta
 python3 -m venv .venv
 source .venv/bin/activate   # Windows: .venv\Scripts\activate
+
+# Runtime dependencies only:
 pip install -r backend/requirements.txt
+
+# Or, for development (adds pytest, ruff, mypy, coverage, pip-audit):
+pip install -r backend/requirements-dev.txt
 ```
+
+`requirements.txt` pins the runtime (FastAPI, PyTorch, Transformers,
+Captum). `requirements-dev.txt` layers the test and lint tooling on top
+with pip's `-r` include, so the two never drift.
 
 ### Frontend
 
@@ -207,7 +265,9 @@ npm install
 ```
 
 The model (~500 MB) downloads automatically from Hugging Face on first
-request and is cached at `~/.cache/huggingface/`.
+use and is cached under `~/.cache/huggingface/`, so later runs are
+offline. On Apple Silicon the backend prefers the `mps` device and falls
+back to CPU automatically; set `SENTIMENTA_DEVICE=cpu` to force CPU.
 
 ## Running Locally
 
@@ -230,23 +290,53 @@ npm run dev
 Open [http://localhost:5173](http://localhost:5173). The dev server
 proxies `/api` requests to `localhost:8000`.
 
+Start the backend first so the model can load; the first startup takes a
+few seconds, or a couple of minutes on the very first run while the
+weights download. The frontend dev server picks up backend changes
+without a restart.
+
+The backend reads configuration from environment variables prefixed with
+`SENTIMENTA_` (see `.env.example`). The most useful knobs are
+`SENTIMENTA_EMOTION_THRESHOLD` (how eager detection is),
+`SENTIMENTA_ENABLE_ATTRIBUTION` (token evidence on/off), and
+`SENTIMENTA_CORS_ORIGINS` (which browser origins may call the API).
+
 ## Testing
 
+The suite is layered so the fast tests stay fast and the real-model
+tests only run when asked:
+
+| Layer | Location | Runs by default |
+|-------|----------|-----------------|
+| Unit | `backend/tests/unit/` | Yes |
+| API | `backend/tests/api/` | Yes |
+| Services | `backend/tests/services/` | Yes |
+| Model | `backend/tests/model/` | No — requires `--runmodel` |
+| Components | `frontend/tests/` | Yes |
+
 ```bash
-# Backend — fast unit + API tests (no model download required)
-pytest backend/tests/unit backend/tests/api -v
+# Backend — fast suites (no PyTorch import, no model download)
+cd backend
+../.venv/bin/pytest tests/unit tests/api tests/services -v
 
-# Backend — real model inference tests (~10 seconds)
-pytest backend/tests/model -v
+# Backend — real model inference (caches ~500 MB on first run)
+../.venv/bin/pytest tests/model -v --runmodel
 
-# Frontend — component tests
-cd frontend && npm test
+# Backend — coverage gate (85% of app/, excluding the HF wrapper)
+../.venv/bin/pytest tests/unit tests/api tests/services \
+  --cov=app --cov-report=term-missing --cov-fail-under=85
 
-# All backend tests together
-pytest backend/tests/ -v
+# Frontend — tests, coverage, types, lint
+cd frontend
+npm run test
+npm run test:coverage
+npm run typecheck
+npm run lint
 ```
 
-See [docs/testing_guide.md](docs/testing_guide.md) for the full testing
+The `--runmodel` flag is defined in `backend/conftest.py`; model-marked
+tests are skipped automatically without it, keeping the default run under
+a second. See [docs/testing_guide.md](docs/testing_guide.md) for the full
 methodology.
 
 ## API
@@ -257,6 +347,23 @@ methodology.
 | GET | `/api/emotions` | Full 28-emotion taxonomy |
 | POST | `/api/analyze` | Analyze a block of text |
 | POST | `/api/analyze/sentences` | Analyze each sentence independently |
+
+All endpoints live under `/api`. Successful responses are JSON objects
+described by the Pydantic models in `backend/app/schemas/analysis.py`.
+Errors always use a single envelope, regardless of cause:
+
+```json
+{ "error": { "code": "text_too_long", "message": "Text is 2500 characters; the limit is 2000." } }
+```
+
+`POST /api/analyze` accepts up to 2,000 characters and returns the
+primary emotion, all detected emotions, the full 28-label spectrum, the
+derived intensity and profile, an explanation, and — optionally — one
+analysis per sentence, capped by `SENTIMENTA_SENTENCE_LIMIT`. Set
+`include_sentences: true` to request the sentence pass. The `metadata`
+object reports character/word/sentence counts, the active threshold,
+whether attribution was used, whether the input was truncated, and
+per-stage latency in milliseconds.
 
 ### Example
 
@@ -277,14 +384,27 @@ feelings.
 
 Key limitations:
 
-- The GoEmotions dataset is based on **Reddit comments** and carries
-  the biases of that source.
+- The GoEmotions dataset is based on **Reddit comments** and carries the
+  biases of that source. Performance varies across cultures, dialects,
+  and writing styles, and short or ambiguous text may be read
+  differently than a person would read it.
 - The model reports an overall F1 of approximately **0.45** under its
   published 0.5 threshold, with substantial variation across emotions.
+  Common labels such as neutral, joy, and gratitude are detected far
+  more reliably than rare or subtle ones.
 - **Confidence scores are not certainty scores.** A score of 0.7 does
-  not mean "70% sure."
+  not mean "70% sure." It is an independent sigmoid value that is useful
+  for ranking emotions within one input, but it is not calibrated as a
+  probability of correctness.
 - Emotional intensity, profile groupings, and the explanation layer are
-  **Sentimenta presentation metrics**, not direct model outputs.
+  **Sentimenta presentation metrics**, not direct model outputs. The
+  model predicts emotion probabilities; the intensity score
+  (`1 − P(neutral)`), the four group shares, and the phrase-level
+  evidence are all derived by Sentimenta and documented in
+  [docs/ml_model_guide.md](docs/ml_model_guide.md).
+- Token attribution shows which words influenced the primary emotion,
+  but it does not prove causation: integrated gradients is a local
+  sensitivity method and can be noisy on very short inputs.
 
 See [docs/ml_model_guide.md](docs/ml_model_guide.md) for full details.
 
@@ -292,25 +412,36 @@ See [docs/ml_model_guide.md](docs/ml_model_guide.md) for full details.
 
 - Your text is analyzed in memory and returned in the API response.
 - **Nothing is persisted** — no database, no logs of text content, no
-  cookies.
-- The model runs locally on your machine (or server); no data leaves
-  your network.
-- Metadata logged by the server is limited to character/word counts
-  and latency numbers.
+  cookies, and no analytics. There are no accounts and therefore no user
+  data to associate with a request.
+- The model runs in the same process as the API (locally, or on the
+  server you deploy to); no text is sent to a third-party ML service.
+- Metadata logged by the server is limited to character/word counts and
+  latency numbers. Verbosity is controlled by `SENTIMENTA_LOG_LEVEL`.
+- Cross-origin access is restricted by an explicit allowlist
+  (`SENTIMENTA_CORS_ORIGINS`); unknown browser origins are rejected.
 
 ## Development Workflow
 
 ```bash
+# Install development dependencies (runtime + lint/test tooling)
+pip install -r backend/requirements-dev.txt
+cd frontend && npm install
+
 # Install pre-commit hooks (one-time setup)
 pre-commit install
 
-# Run linters before committing
-ruff check backend/app backend/tests
+# Lint before committing
+cd backend && ruff check .
 cd frontend && npm run lint
 
 # Type checking
 mypy backend/app --ignore-missing-imports
 cd frontend && npm run typecheck
+
+# Fast tests with coverage
+cd backend && ../.venv/bin/pytest tests/unit tests/api tests/services --cov=app
+cd frontend && npm run test:coverage
 ```
 
 See [docs/development_guide.md](docs/development_guide.md) for the full
@@ -326,6 +457,10 @@ developer guide.
 5. Update `CHANGELOG.md` per
    [docs/update_changelog.md](docs/update_changelog.md)
 6. Submit a pull request
+
+Before opening a PR, make sure the fast backend suite, the frontend
+lint/typecheck/tests, and both coverage gates pass locally (see
+[Testing](#testing)).
 
 ## License
 

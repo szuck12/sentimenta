@@ -32,7 +32,7 @@ cd sentimenta
 # Backend
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -r backend/requirements.txt
+pip install -r backend/requirements-dev.txt   # runtime + dev tooling
 
 # Frontend
 cd frontend
@@ -58,7 +58,7 @@ Check readiness:
 
 ```bash
 curl http://localhost:8000/api/health
-# {"status":"ok","version":"0.1.0","model_id":"SamLowe/roberta-base-go_emotions","model_loaded":true}
+# {"status":"ok","version":"1.0.1","model_id":"SamLowe/roberta-base-go_emotions","model_loaded":true}
 ```
 
 ---
@@ -120,24 +120,18 @@ The backend reads a `.env` file at the project root if present.
 
 ## Running Tests
 
-### Backend Unit Tests
+### Backend Fast Tests (unit, API, services)
 
 ```bash
 cd backend
-../.venv/bin/pytest tests/unit/ -v
+../.venv/bin/pytest tests/unit tests/api tests/services -v
 ```
 
-Tests preprocessing (whitespace, sentence splitting) and metrics
-(ranking, intensity, profile). No model or network dependencies.
-
-### Backend API Tests
-
-```bash
-cd backend
-../.venv/bin/pytest tests/api/ -v
-```
-
-Tests HTTP endpoints with stub services. No PyTorch import.
+Unit tests cover preprocessing, metrics, the emotion taxonomy, settings,
+the error envelope, and the schemas. API tests exercise HTTP
+request/response round-trips with stub services. Service tests cover
+analysis orchestration and the explanation fallbacks. None of these
+import PyTorch or touch the network.
 
 ### Backend Model Tests
 
@@ -146,30 +140,34 @@ cd backend
 ../.venv/bin/pytest tests/model/ -v --runmodel
 ```
 
-Tests real model inference. Requires downloaded model weights (~500 MB).
-Marked with `pytest.mark.model`.
+Real inference tests. Requires the downloaded model weights (~500 MB,
+cached under `~/.cache/huggingface/`). Marked with `pytest.mark.model`
+and skipped automatically unless `--runmodel` is passed (implemented in
+`backend/conftest.py`).
 
-### All Backend Tests
+### Coverage
 
 ```bash
 cd backend
-../.venv/bin/pytest tests/ -v
+../.venv/bin/pytest tests/unit tests/api tests/services \
+  --cov=app --cov-report=term-missing --cov-fail-under=85
 ```
+
+The gate measures the `app` package and excludes the Hugging Face
+wrapper (`app/services/emotion_model_service.py`), which is exercised
+only by the gated model tests.
 
 ### Frontend Component Tests
 
 ```bash
 cd frontend
-npm run test
+npm run test            # single run
+npm run test:watch      # watch mode
+npm run test:coverage   # with an 80% coverage gate
 ```
 
-Or in watch mode:
-
-```bash
-npm run test:watch
-```
-
-Uses Vitest with jsdom environment and React Testing Library.
+Uses Vitest with jsdom, React Testing Library, and a shared setup file
+(`frontend/tests/setup.ts`).
 
 ### E2E Tests (Planned)
 
@@ -208,7 +206,7 @@ npm run lint
 Auto-fix:
 
 ```bash
-npx eslint . --ext ts,tsx --fix
+npx eslint . --fix
 ```
 
 ### Frontend (Prettier)
@@ -236,7 +234,7 @@ cd frontend
 npm run typecheck
 ```
 
-Equivalent to `tsc --noEmit`.
+Runs `tsc -b` across the app and node TypeScript projects.
 
 ---
 
@@ -361,7 +359,7 @@ only works in dev mode (`npm run dev`), not in production builds.
 **Fix**: Ensure dependencies are up to date:
 
 ```bash
-cd backend && ../.venv/bin/pip install -r requirements.txt
+cd backend && ../.venv/bin/pip install -r requirements-dev.txt
 cd frontend && npm install
 ```
 

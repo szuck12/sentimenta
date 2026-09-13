@@ -74,7 +74,8 @@ class StubAnalysisService(AnalysisService):
                 for e, s in detected
             ],
             all_emotions=[
-                EmotionScore(label=ranked[0][0], score=round(ranked[0][1], 4)),
+                EmotionScore(label=e, score=round(s, 4))
+                for e, s in ranked
             ],
             intensity=Intensity(score=0.90, label="high"),
             profile=Profile(
@@ -131,14 +132,20 @@ def stub_service() -> StubAnalysisService:
 
 
 @pytest.fixture
-async def client(stub_service: StubAnalysisService) -> AsyncClient:
+def app(stub_service: StubAnalysisService):  # type: ignore[no-untyped-def]
+    """A fresh FastAPI app with all service dependencies stubbed."""
     from app.main import create_app
     settings = _make_settings()
-    app = create_app()
-    app.dependency_overrides[routes.get_analysis_service] = lambda: stub_service
-    app.dependency_overrides[routes.get_settings] = lambda: settings
-    app.dependency_overrides[routes.get_model_service] = lambda: _StubModelService(settings)
-    transport = ASGITransport(app=app)
+    application = create_app()
+    application.dependency_overrides[routes.get_analysis_service] = lambda: stub_service
+    application.dependency_overrides[routes.get_settings] = lambda: settings
+    application.dependency_overrides[routes.get_model_service] = lambda: _StubModelService(settings)
+    return application
+
+
+@pytest.fixture
+async def client(app) -> AsyncClient:  # type: ignore[no-untyped-def]
+    transport = ASGITransport(app=app)  # type: ignore[arg-type]
     async with AsyncClient(transport=transport, base_url="http://test") as ac:
         yield ac
 

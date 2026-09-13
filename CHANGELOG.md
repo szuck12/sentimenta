@@ -5,7 +5,60 @@ All notable changes to this project are documented in this file.
 The format follows [Keep a Changelog](https://keepachangelog.com) and this
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.1.0] - 2026-08-25
+## [1.0.1] - 2026-09-13
+
+### Added
+
+- **Expanded backend test suite** — unit tests for the emotion taxonomy,
+  settings, the error envelope, and the Pydantic schemas; API tests for
+  error paths, unknown routes, and CORS; service-layer orchestration tests;
+  and extended real-model tests covering offset attribution and the token
+  budget boundary.
+- **Expanded frontend test suite** — a shared Vitest setup file plus tests
+  for the API client, the `useAnalysis` hook, UI primitives, result cards,
+  pages, and router navigation.
+- **Coverage tooling** — `pytest-cov` for the backend and
+  `@vitest/coverage-v8` for the frontend, each with a configured
+  threshold.
+- **`--runmodel` pytest option** — real Hugging Face inference tests are
+  now skipped by default and run only when the flag is passed, matching
+  the documented workflow.
+- **Developer dependencies** — `backend/requirements-dev.txt` and a
+  frontend ESLint flat config (`frontend/eslint.config.js`).
+- **`.github/dependabot.yml`** — automated weekly pip and npm dependency
+  update checks.
+- **README model explainer** — expanded descriptions of the RoBERTa
+  pipeline, multi-label sigmoid classification, derived metrics, and
+  attribution.
+- **Expanded security policy** — scope notes on model sourcing, input
+  bounds, dependency scanning, container hardening, and disclosure
+  handling.
+
+### Changed
+
+- **Version bumped to 1.0.1** across the backend settings, frontend
+  package, README, and security policy.
+- **Fast tests no longer import PyTorch** — `EmotionModelService` and
+  `ExplanationService` now import `torch`/`captum` lazily, so the unit and
+  API suites stay lightweight and quick.
+- **CI workflow corrected** — fast tests, gated model tests, and
+  lint/typecheck now run against the real project layout.
+- **Documentation aligned** — the testing guide, development guide, and
+  README now describe the commands and test inventory that actually exist.
+
+### Fixed
+
+- **Unimplemented `--runmodel` flag** — previously referenced by the
+  README, guides, and CI but never defined, which caused real-model tests
+  to run during fast test runs and would have errored CI.
+- **Missing frontend ESLint configuration** — `npm run lint` and the
+  pre-commit hook now have a valid flat config.
+- **Broken CI test paths** — references to a non-existent
+  `requirements-dev.txt` and `tests/test_model_integration.py` are gone.
+- **Weak metrics test** — replaced a test that asserted nothing with a
+  real 28-label profile invariant check.
+
+## [1.0.0] - 2026-08-25
 
 ### Added
 

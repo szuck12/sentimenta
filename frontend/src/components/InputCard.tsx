@@ -2,7 +2,7 @@
 // The primary input interface: textarea, character counter, example
 // chips, clear/reset, validation messages, and the Analyze button.
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -65,7 +65,6 @@ export function InputCard({ status, onSubmit, onReset }: Props) {
     onReset()
   }, [setValue, onReset])
 
-  const charPct = Math.min((text.length / MAX_CHARS) * 100, 100)
   const nearLimit = text.length > MAX_CHARS * 0.9
   const overLimit = text.length > MAX_CHARS
 

@@ -1,0 +1,12 @@
+[run]
+source = app
+# The Hugging Face wrapper is exercised only by the gated model tests
+# (`--runmodel`); exclude it from the fast-suite coverage gate.
+omit =
+    app/services/emotion_model_service.py
+
+[report]
+show_missing = True
+exclude_lines =
+    pragma: no cover
+    if TYPE_CHECKING:
