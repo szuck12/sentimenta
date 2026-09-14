@@ -9,8 +9,9 @@
 - [x] 2026-09-14 — v1.3.2 — CI fix (install CPU-only PyTorch in the
       backend and model jobs so Linux runners no longer pull the ~7 GB
       CUDA dependency stack) plus UI updates: Emotion Mix shows the top
-      five emotions, Full Spectrum uses a single colour, a new hero
-      heading, and corrected Excitement/Fear example sentences
+      five emotions with percentages normalized to total 100%, Full
+      Spectrum uses a single colour, updated hero copy, corrected
+      Excitement/Fear example sentences, and "Analyzing" spelling
       (#infra, #frontend)
 - [x] 2026-09-13 — v1.3.1 — security hardening round three: corrected
       rate limiter (thread-safe sliding window, LRU-bounded, proxy-aware),

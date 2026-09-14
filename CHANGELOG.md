@@ -11,14 +11,18 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - **Emotion Mix** now always shows the **top five emotions** with their
   percentages, instead of a varying number of threshold-detected
-  emotions.
+  emotions. Percentages are normalized with largest-remainder rounding so
+  they always total exactly 100%.
 - **Full Spectrum** now renders every bar in the same coral colour; the
   lighter shade for below-threshold emotions was removed.
-- **Home hero heading** changed from "What are your words feeling?" to
-  **"What emotion does this text convey?"**.
+- **Home hero copy** now reads **"What emotions does this text convey?"**
+  with the subheading **"Explore the emotions and sentiment hiding inside
+  text."**.
 
 ### Fixed
 
+- **Spelling** — the loading label and error copy now use the American
+  spelling **"Analyzing"** (previously "Analysing").
 - **Example chips** — the "Excitement" example now produces excitement as
   the dominant emotion, and the "Worry" chip was replaced with **"Fear"**
   (worry is not a GoEmotions label) with a sentence whose primary emotion

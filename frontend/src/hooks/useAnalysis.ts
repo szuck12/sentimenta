@@ -34,7 +34,7 @@ export function useAnalysis() {
         setError(
           err instanceof Error
             ? err.message
-            : 'Something went wrong while analysing your text.',
+            : 'Something went wrong while analyzing your text.',
         )
         setStatus('error')
       }

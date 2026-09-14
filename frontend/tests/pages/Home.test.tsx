@@ -24,8 +24,11 @@ describe('Home', () => {
     renderHome()
     expect(
       screen.getByRole('heading', {
-        name: /what emotion does this text convey/i,
+        name: /what emotions does this text convey/i,
       }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText(/emotions and sentiment hiding inside text/i),
     ).toBeInTheDocument()
     expect(
       screen.getByPlaceholderText(/read between the lines/i),

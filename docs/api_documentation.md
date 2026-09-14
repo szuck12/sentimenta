@@ -437,7 +437,7 @@ When enabled, the `sentences` array is populated:
 
 ### POST /api/analyze/sentences
 
-Analyses each sentence of the input independently. Useful for tracking
+Analyzes each sentence of the input independently. Useful for tracking
 emotional shifts across a passage.
 
 **Request Body**

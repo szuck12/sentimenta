@@ -2,7 +2,7 @@
 
 Current version: **1.3.2** — [Changelog](CHANGELOG.md)
 
-Understand what your words are feeling.
+Understand the emotions and sentiment inside text.
 
 Sentimenta is a full-stack, explainable emotion-analysis web application
 powered by Google's GoEmotions dataset and the RoBERTa transformer

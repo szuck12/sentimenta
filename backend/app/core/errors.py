@@ -112,7 +112,7 @@ async def unhandled_error_handler(
             "error": {
                 "code": "internal_error",
                 "message": (
-                    "Something went wrong while analysing your "
+                    "Something went wrong while analyzing your "
                     "text. Please try again."
                 ),
             }

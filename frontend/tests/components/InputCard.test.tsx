@@ -121,7 +121,7 @@ describe('InputCard', () => {
       screen.getByRole('button', { name: 'Excitement' }),
     ).toBeDisabled()
     expect(
-      screen.getByRole('button', { name: /analysing/i }),
+      screen.getByRole('button', { name: /analyzing/i }),
     ).toBeDisabled()
   })
 

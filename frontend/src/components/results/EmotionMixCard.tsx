@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { cn } from '@/lib/utils'
+import { cn, toWholePercentages } from '@/lib/utils'
 import { Card } from '@/components/ui/Card'
 
 const EMOJI_MAP: Record<string, string> = {
@@ -28,6 +28,8 @@ export function EmotionMixCard({
   emotions,
   primaryLabel,
 }: EmotionMixCardProps) {
+  const percentages = toWholePercentages(emotions.map((e) => e.score))
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
@@ -40,8 +42,8 @@ export function EmotionMixCard({
         </h3>
 
         <div className="flex flex-col gap-2">
-          {emotions.map(({ label, score }) => {
-            const pct = Math.round(score * 100)
+          {emotions.map(({ label }, index) => {
+            const pct = percentages[index]
             const isPrimary = label === primaryLabel
 
             return (

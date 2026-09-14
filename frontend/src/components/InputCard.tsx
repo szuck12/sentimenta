@@ -153,7 +153,7 @@ export function InputCard({ status, onSubmit, onReset }: Props) {
             {loading ? (
               <>
                 <span className="animate-spin inline-block h-4 w-4 border-2 border-white/30 border-t-white rounded-full" />
-                Analysing...
+                Analyzing...
               </>
             ) : (
               <>
