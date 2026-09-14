@@ -6,6 +6,9 @@
 
 ## Done
 
+- [x] 2026-09-14 — v1.3.2 — CI fix: install CPU-only PyTorch in the
+      backend and model jobs so Linux runners no longer pull the ~7 GB
+      CUDA dependency stack (#infra)
 - [x] 2026-09-13 — v1.3.1 — security hardening round three: corrected
       rate limiter (thread-safe sliding window, LRU-bounded, proxy-aware),
       fixed middleware ordering, body-size and concurrency limits, model

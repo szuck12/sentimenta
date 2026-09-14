@@ -5,6 +5,17 @@ All notable changes to this project are documented in this file.
 The format follows [Keep a Changelog](https://keepachangelog.com) and this
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.2] - 2026-09-14
+
+### Fixed
+
+- **CI backend/model jobs failed on Linux** — `pip install torch==2.14.0`
+  pulled the CUDA 13 build plus the ~7 GB NVIDIA/triton dependency stack
+  on Linux runners, exhausting the runner's disk during installation.
+  CI now installs the CPU-only PyTorch wheel via the
+  `https://download.pytorch.org/whl/cpu` index, reducing the download to
+  under 200 MB with no CUDA dependencies. Local development is unchanged.
+
 ## [1.3.1] - 2026-09-13
 
 ### Added
