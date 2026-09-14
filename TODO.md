@@ -6,6 +6,11 @@
 
 ## Done
 
+- [x] 2026-09-13 — v1.3.1 — security hardening round three: corrected
+      rate limiter (thread-safe sliding window, LRU-bounded, proxy-aware),
+      fixed middleware ordering, body-size and concurrency limits, model
+      weight SHA-256 verification, health endpoint slimming, and removal
+      of the unused `slowapi` dependency (#security, #backend)
 - [x] 2026-09-13 — v1.3.0 — security hardening round two: rate
       limiting, field validation, CORS wildcard guard, safer defaults,
       hardened dependency guards, frontend error states, and pinned

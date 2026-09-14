@@ -8,7 +8,11 @@ import pytest
 
 from app.core.config import Settings
 from app.core.emotions import Emotion
-from app.core.errors import EmptyTextError, ModelUnavailableError
+from app.core.errors import (
+    EmptyTextError,
+    ModelUnavailableError,
+    TextTooLongError,
+)
 from app.services.analysis_service import AnalysisService
 from app.services.explanation_service import ExplanationService
 
@@ -90,6 +94,42 @@ def test_analyze_requires_loaded_model() -> None:
     service, _ = _make(model=FakeModelService(loaded=False))
     with pytest.raises(ModelUnavailableError):
         service.analyze("hello", include_sentences=False)
+
+
+def test_analyze_enforces_configured_max_text_chars() -> None:
+    settings = Settings(
+        model_id="test-model",
+        max_text_chars=5,
+        enable_attribution=False,
+        device="cpu",
+    )
+    service, _ = _make(settings=settings)
+    with pytest.raises(TextTooLongError):
+        service.analyze("way too long", include_sentences=False)
+
+
+def test_analyze_allows_text_at_configured_limit() -> None:
+    settings = Settings(
+        model_id="test-model",
+        max_text_chars=5,
+        enable_attribution=False,
+        device="cpu",
+    )
+    service, _ = _make(settings=settings)
+    response = service.analyze("12345", include_sentences=False)
+    assert response.primary_emotion.label is Emotion.JOY
+
+
+def test_analyze_sentences_enforces_max_text_chars() -> None:
+    settings = Settings(
+        model_id="test-model",
+        max_text_chars=3,
+        enable_attribution=False,
+        device="cpu",
+    )
+    service, _ = _make(settings=settings)
+    with pytest.raises(TextTooLongError):
+        service.analyze_sentences("abcd")
 
 
 def test_analyze_metadata_counts_and_latency() -> None:

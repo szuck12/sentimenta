@@ -5,7 +5,11 @@
 import time
 
 from ..core.config import Settings
-from ..core.errors import EmptyTextError, ModelUnavailableError
+from ..core.errors import (
+    EmptyTextError,
+    ModelUnavailableError,
+    TextTooLongError,
+)
 from ..schemas.analysis import (
     AnalyzeMetadata,
     AnalyzeResponse,
@@ -45,6 +49,21 @@ class AnalysisService:
         if not self.models.is_loaded:
             raise ModelUnavailableError()
 
+    def _enforce_text_limit(self, text: str) -> None:
+        """Reject text longer than the configured limit.
+
+        The request schema applies a hard ceiling; this enforces the
+        operator-configurable ``max_text_chars`` so lowering it via the
+        environment actually tightens the API bound.
+
+        Raises:
+            TextTooLongError: If ``text`` exceeds the limit.
+        """
+        if len(text) > self.settings.max_text_chars:
+            raise TextTooLongError(
+                self.settings.max_text_chars, len(text)
+            )
+
     def analyze(self, text: str, include_sentences: bool) -> AnalyzeResponse:
         """Analyze one block of text end-to-end.
 
@@ -62,6 +81,7 @@ class AnalysisService:
             ModelUnavailableError: If the model is still loading.
         """
         started = time.perf_counter()
+        self._enforce_text_limit(text)
         normalized = normalize_text(text)
         if not normalized:
             raise EmptyTextError()
@@ -129,6 +149,7 @@ class AnalysisService:
             Per-sentence analyses in original order plus metadata.
         """
         started = time.perf_counter()
+        self._enforce_text_limit(text)
         normalized = normalize_text(text)
         if not normalized:
             raise EmptyTextError()

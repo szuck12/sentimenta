@@ -196,3 +196,26 @@ class TestModelServiceState:
     ) -> None:
         scores = loaded_service.predict(["I'm nervous but excited!"])[0]
         assert 0.0 <= sum(scores.values()) <= len(Emotion)
+
+
+class TestIntegrityVerification:
+    """The pinned SHA-256 is enforced when loading weights."""
+
+    def test_wrong_hash_raises(self) -> None:
+        settings = Settings(
+            model_id="SamLowe/roberta-base-go_emotions",
+            model_revision="d75048347613a25d77de8cf6412eaae9fa7b26be",
+            model_sha256="0" * 64,
+        )
+        service = EmotionModelService(settings)
+        with pytest.raises(RuntimeError):
+            service.load()
+
+    def test_correct_hash_loads(self) -> None:
+        settings = Settings(
+            model_id="SamLowe/roberta-base-go_emotions",
+            model_revision="d75048347613a25d77de8cf6412eaae9fa7b26be",
+        )
+        service = EmotionModelService(settings)
+        service.load()
+        assert service.is_loaded is True

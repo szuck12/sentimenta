@@ -58,7 +58,7 @@ Check readiness:
 
 ```bash
 curl http://localhost:8000/api/health
-# {"status":"ok","version":"1.3.0","model_id":"SamLowe/roberta-base-go_emotions","model_loaded":true}
+# {"status":"ok","version":"1.3.1","model_loaded":true}
 ```
 
 ---
@@ -102,18 +102,24 @@ Key variables:
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `SENTIMENTA_HOST` | `0.0.0.0` | Backend bind address |
+| `SENTIMENTA_HOST` | `127.0.0.1` | Backend bind address |
 | `SENTIMENTA_PORT` | `8000` | Backend port |
 | `SENTIMENTA_LOG_LEVEL` | `INFO` | Logging level |
 | `SENTIMENTA_MAX_TEXT_CHARS` | `2000` | Maximum input length |
 | `SENTIMENTA_MODEL_ID` | `SamLowe/roberta-base-go_emotions` | Hugging Face model |
 | `SENTIMENTA_MODEL_REVISION` | pinned commit | Immutable model commit (supply-chain integrity) |
+| `SENTIMENTA_MODEL_SHA256` | pinned digest | SHA-256 of the weights, verified on load |
 | `SENTIMENTA_DEVICE` | (auto) | `cpu`, `mps`, or empty for auto |
 | `SENTIMENTA_EMOTION_THRESHOLD` | `0.30` | Detection threshold |
 | `SENTIMENTA_SENTENCE_LIMIT` | `10` | Max sentences per analysis |
 | `SENTIMENTA_ENABLE_ATTRIBUTION` | `true` | Captum attribution switch |
 | `SENTIMENTA_ATTRIBUTION_STEPS` | `16` | Integrated gradient steps |
-| `SENTIMENTA_ENABLE_DOCS` | `true` | Expose `/docs`, `/redoc`, `/openapi.json` |
+| `SENTIMENTA_ENABLE_DOCS` | `false` | Expose `/docs`, `/redoc`, `/openapi.json` |
+| `SENTIMENTA_RATE_LIMIT` | `30/minute` | Per-client rate limit (`0` disables) |
+| `SENTIMENTA_TRUST_PROXY` | `false` | Use `X-Forwarded-For`/`X-Real-IP` for the client IP |
+| `SENTIMENTA_MAX_BODY_BYTES` | `65536` | Reject larger request bodies (HTTP 413) |
+| `SENTIMENTA_MAX_CONCURRENT_REQUESTS` | `4` | Concurrent analysis requests before queueing |
+| `SENTIMENTA_MAX_QUEUE_WAIT_SECONDS` | `5.0` | Wait for a slot before returning HTTP 503 |
 
 Settings are read with the `SENTIMENTA_` prefix via `pydantic-settings`.
 The backend reads a `.env` file at the project root if present.

@@ -161,11 +161,14 @@ class SentenceAnalysisResponse(BaseModel):
 
 
 class HealthResponse(BaseModel):
-    """Response body for GET /api/health."""
+    """Response body for GET /api/health.
+
+    Deliberately minimal: the model identifier is not disclosed to
+    unauthenticated callers to reduce fingerprinting.
+    """
 
     status: str
     version: str
-    model_id: str
     model_loaded: bool
 
 

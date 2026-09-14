@@ -9,10 +9,12 @@ from app.core.config import Settings, get_settings
 
 def test_settings_defaults() -> None:
     settings = Settings()
-    assert settings.version == "1.3.0"
+    assert settings.version == "1.3.1"
     assert settings.model_id == "SamLowe/roberta-base-go_emotions"
     assert len(settings.model_revision) == 40
     assert all(c in "0123456789abcdef" for c in settings.model_revision)
+    assert len(settings.model_sha256) == 64
+    assert all(c in "0123456789abcdef" for c in settings.model_sha256)
     assert settings.emotion_threshold == 0.30
     assert settings.max_text_chars == 2000
     assert settings.sentence_limit == 10
@@ -20,6 +22,10 @@ def test_settings_defaults() -> None:
     assert settings.attribution_steps == 16
     assert settings.enable_docs is False
     assert settings.rate_limit == "30/minute"
+    assert settings.trust_proxy is False
+    assert settings.max_body_bytes == 65536
+    assert settings.max_concurrent_requests == 4
+    assert settings.max_queue_wait_seconds == 5.0
 
 
 def test_environment_overrides(monkeypatch) -> None:  # type: ignore[no-untyped-def]
@@ -69,6 +75,23 @@ def test_cors_wildcard_with_spaces_rejected() -> None:
 def test_cors_valid_origin_accepted() -> None:
     settings = Settings(cors_origins=["https://example.test"])
     assert settings.cors_origins == ["https://example.test"]
+
+
+@pytest.mark.parametrize(
+    "value", ["banana", "30/fortnight", "x/minute", "30"]
+)
+def test_rate_limit_rejects_invalid(value: str) -> None:
+    with pytest.raises(ValidationError):
+        Settings(rate_limit=value)
+
+
+def test_rate_limit_allows_disabled() -> None:
+    assert Settings(rate_limit="0").rate_limit == "0"
+    assert Settings(rate_limit="").rate_limit == ""
+
+
+def test_rate_limit_accepts_valid() -> None:
+    assert Settings(rate_limit="60/hour").rate_limit == "60/hour"
 
 
 def test_get_settings_is_cached() -> None:

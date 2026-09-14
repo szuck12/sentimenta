@@ -6,6 +6,8 @@ from functools import lru_cache
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from .ratelimit import parse_rate_limit
+
 
 class Settings(BaseSettings):
     """Runtime settings for the Sentimenta API.
@@ -46,6 +48,18 @@ class Settings(BaseSettings):
             by default to reduce the exposed surface.
         rate_limit: Per-IP rate limit (e.g. ``'30/minute'``).  Set
             to ``'0'`` or leave blank to disable.
+        trust_proxy: When True, derive the client IP from
+            ``X-Forwarded-For``/``X-Real-IP``.  Only enable behind a
+            trusted reverse proxy that overwrites these headers.
+        max_body_bytes: Maximum accepted request body size in bytes.
+            Larger requests are rejected with HTTP 413.
+        max_concurrent_requests: Maximum number of concurrent analysis
+            requests; additional requests queue briefly and then fail
+            with HTTP 503.
+        max_queue_wait_seconds: How long a request waits for a free
+            concurrency slot before being rejected.
+        model_sha256: Expected SHA-256 of the model weights file.  When
+            set, the downloaded weights are verified before loading.
         log_level: Uvicorn/loguru-free stdlib logging level.
     """
 
@@ -54,7 +68,7 @@ class Settings(BaseSettings):
     )
 
     app_name: str = "Sentimenta API"
-    version: str = "1.3.0"
+    version: str = "1.3.1"
 
     cors_origins: list[str] = [
         "http://localhost:5173",
@@ -75,11 +89,18 @@ class Settings(BaseSettings):
 
     model_id: str = "SamLowe/roberta-base-go_emotions"
     model_revision: str = "d75048347613a25d77de8cf6412eaae9fa7b26be"
+    model_sha256: str = (
+        "84d6d338b4cf63f0ed3c990a0ce748d32d1d2965c072f4645accaa71af3888c0"
+    )
     device: str = ""
 
     enable_docs: bool = False
 
     rate_limit: str = "30/minute"
+    trust_proxy: bool = False
+    max_body_bytes: int = 65536
+    max_concurrent_requests: int = 4
+    max_queue_wait_seconds: float = 5.0
 
     log_level: str = "INFO"
 
@@ -110,6 +131,15 @@ class Settings(BaseSettings):
                     "CORS wildcard '*' is not allowed. "
                     "Use explicit origins instead."
                 )
+        return v
+
+    @field_validator("rate_limit")
+    @classmethod
+    def _validate_rate_limit(cls, v: str) -> str:
+        try:
+            parse_rate_limit(v)
+        except ValueError as exc:
+            raise ValueError(str(exc)) from exc
         return v
 
 

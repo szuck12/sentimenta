@@ -222,13 +222,71 @@ async def test_docs_can_be_enabled(
         assert (await ac.get("/docs")).status_code == 200
 
 
-async def test_rate_limiter_blocks_after_limit() -> None:
-    """Test the rate limiter logic directly."""
-    from app.main import _RateLimiter
+async def test_rate_limit_response_has_cors_and_security_headers(
+    app, client
+) -> None:
+    from app.core.ratelimit import RateLimiter
 
-    limiter = _RateLimiter(limit=1, window_seconds=60.0)
-    assert limiter.is_limited("1.2.3.4") is False  # 0 prior ≤ 1 → allowed
-    assert limiter.is_limited("1.2.3.4") is False  # 1 prior ≤ 1 → allowed
-    assert limiter.is_limited("1.2.3.4") is True   # 2 prior > 1 → blocked
-    # Different IPs are independent
-    assert limiter.is_limited("5.6.7.8") is False
+    app.state.limiter = RateLimiter(limit=1, window_seconds=60.0)
+    origin = {"Origin": "http://localhost:5173"}
+    first = await client.get("/api/health", headers=origin)
+    assert first.status_code == 200
+    second = await client.get("/api/health", headers=origin)
+    assert second.status_code == 429
+    assert second.json()["error"]["code"] == "rate_limited"
+    # CORS and security headers must wrap rate-limit responses too
+    assert (
+        second.headers.get("access-control-allow-origin")
+        == "http://localhost:5173"
+    )
+    assert second.headers.get("x-content-type-options") == "nosniff"
+
+
+async def test_cors_preflight_not_rate_limited(app, client) -> None:
+    from app.core.ratelimit import RateLimiter
+
+    app.state.limiter = RateLimiter(limit=1, window_seconds=60.0)
+    await client.get("/api/health")
+    assert (await client.get("/api/health")).status_code == 429
+    # Preflight is handled by CORS before reaching the limiter.
+    resp = await client.options(
+        "/api/analyze",
+        headers={
+            "Origin": "http://localhost:5173",
+            "Access-Control-Request-Method": "POST",
+        },
+    )
+    assert resp.status_code == 200
+
+
+async def test_oversized_body_rejected(app, client) -> None:
+    app.state.max_body_bytes = 64
+    resp = await client.post(
+        "/api/analyze",
+        json={"text": "x" * 500},
+        headers={"Origin": "http://localhost:5173"},
+    )
+    assert resp.status_code == 413
+    assert resp.json()["error"]["code"] == "request_too_large"
+    assert (
+        resp.headers.get("access-control-allow-origin")
+        == "http://localhost:5173"
+    )
+
+
+async def test_concurrency_limit_returns_503(app, client) -> None:
+    import asyncio
+
+    app.state.concurrency_sem = asyncio.Semaphore(0)
+    app.state.max_queue_wait_seconds = 0.01
+    resp = await client.post("/api/analyze", json={"text": "hello"})
+    assert resp.status_code == 503
+    assert resp.json()["error"]["code"] == "server_busy"
+
+
+async def test_health_does_not_expose_model_id(
+    client: httpx.AsyncClient,
+) -> None:
+    body = (await client.get("/api/health")).json()
+    assert "model_id" not in body
+    assert body["status"] == "ok"

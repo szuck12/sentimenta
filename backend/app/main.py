@@ -2,8 +2,8 @@
 # FastAPI application factory and startup lifespan that loads the
 # emotion model exactly once before accepting requests.
 
+import asyncio
 import logging
-import time
 from collections.abc import Awaitable, Callable
 
 from fastapi import FastAPI, Request
@@ -21,61 +21,24 @@ from .core.errors import (
     unhandled_error_handler,
     validation_error_handler,
 )
+from .core.ratelimit import RateLimiter, client_ip, parse_rate_limit
 from .services.analysis_service import AnalysisService
 from .services.emotion_model_service import EmotionModelService
 from .services.explanation_service import ExplanationService
 
 logger = logging.getLogger(__name__)
 
-
-class _RateLimiter:
-    """Simple in-memory sliding-window rate limiter.
-
-    Each key (typically a client IP) gets ``limit`` requests per
-    ``window_seconds``.  Old entries are reaped periodically to bound
-    memory usage.
-    """
-
-    def __init__(self, limit: int, window_seconds: float) -> None:
-        self.limit = limit
-        self.window = window_seconds
-        self._hits: list[tuple[str, float]] = []
-        self._last_reap = time.monotonic()
-
-    def _reap(self) -> None:
-        now = time.monotonic()
-        if now - self._last_reap > self.window:
-            cutoff = now - self.window
-            self._hits = [(k, t) for k, t in self._hits if t > cutoff]
-            self._last_reap = now
-
-    def is_limited(self, key: str) -> bool:
-        """Return ``True`` if *key* has exceeded the limit."""
-        self._reap()
-        now = time.monotonic()
-        cutoff = now - self.window
-        recent = sum(1 for k, t in self._hits if k == key and t > cutoff)
-        if recent <= self.limit:
-            self._hits.append((key, now))
-            return False
-        return True
+# Only these paths are subject to the concurrency cap (the expensive,
+# model-backed analysis endpoints).
+_CONCURRENCY_PREFIX = "/api/analyze"
 
 
-def _parse_rate_limit(rate: str) -> tuple[int, float]:
-    """Parse a rate limit string like ``'30/minute'`` into (count, seconds)."""
-    parts = rate.strip().split("/", 1)
-    if len(parts) != 2:
-        raise ValueError(f"Invalid rate format: {rate!r}")
-    count = int(parts[0])
-    unit = parts[1].lower()
-    seconds = {
-        "second": 1, "seconds": 1,
-        "minute": 60, "minutes": 60,
-        "hour": 3600, "hours": 3600,
-    }.get(unit)
-    if seconds is None:
-        raise ValueError(f"Unknown rate unit: {unit!r}")
-    return count, seconds
+def _error_response(status_code: int, code: str, message: str) -> JSONResponse:
+    """Build a standard error envelope response."""
+    return JSONResponse(
+        status_code=status_code,
+        content={"error": {"code": code, "message": message}},
+    )
 
 
 @asynccontextmanager
@@ -120,25 +83,74 @@ async def add_security_headers(
     return response
 
 
-async def add_rate_limiting(
+async def enforce_body_size(
     request: Request,
     call_next: Callable[[Request], Awaitable[Response]],
 ) -> Response:
-    """Apply per-IP rate limiting to every request."""
-    limiter: _RateLimiter | None = getattr(
+    """Reject requests whose declared body exceeds the configured limit."""
+    limit: int = getattr(request.app.state, "max_body_bytes", 0)
+    if limit:
+        header = request.headers.get("content-length")
+        if header is not None:
+            try:
+                length = int(header)
+            except ValueError:
+                return _error_response(
+                    400,
+                    "invalid_content_length",
+                    "The Content-Length header is invalid.",
+                )
+            if length > limit:
+                return _error_response(
+                    413,
+                    "request_too_large",
+                    "The request body is too large.",
+                )
+    return await call_next(request)  # type: ignore[no-any-return]
+
+
+async def limit_concurrency(
+    request: Request,
+    call_next: Callable[[Request], Awaitable[Response]],
+) -> Response:
+    """Cap the number of concurrent analysis requests."""
+    semaphore: asyncio.Semaphore | None = getattr(
+        request.app.state, "concurrency_sem", None
+    )
+    if semaphore is None or not request.url.path.startswith(
+        _CONCURRENCY_PREFIX
+    ):
+        return await call_next(request)  # type: ignore[no-any-return]
+    wait = getattr(request.app.state, "max_queue_wait_seconds", 5.0)
+    try:
+        await asyncio.wait_for(semaphore.acquire(), timeout=wait)
+    except asyncio.TimeoutError:
+        return _error_response(
+            503,
+            "server_busy",
+            "The analysis service is busy. Please try again shortly.",
+        )
+    try:
+        return await call_next(request)  # type: ignore[no-any-return]
+    finally:
+        semaphore.release()
+
+
+async def enforce_rate_limit(
+    request: Request,
+    call_next: Callable[[Request], Awaitable[Response]],
+) -> Response:
+    """Apply per-client rate limiting to every request."""
+    limiter: RateLimiter | None = getattr(
         request.app.state, "limiter", None
     )
     if limiter is not None:
-        client_ip = request.client.host if request.client else "unknown"
-        if limiter.is_limited(client_ip):
-            return JSONResponse(
-                status_code=429,
-                content={
-                    "error": {
-                        "code": "rate_limited",
-                        "message": "Too many requests. Please try again later.",
-                    }
-                },
+        trust_proxy: bool = getattr(request.app.state, "trust_proxy", False)
+        if limiter.is_limited(client_ip(request, trust_proxy)):
+            return _error_response(
+                429,
+                "rate_limited",
+                "Too many requests. Please try again later.",
             )
     return await call_next(request)  # type: ignore[no-any-return]
 
@@ -148,11 +160,15 @@ def create_app() -> FastAPI:
     settings = get_settings()
 
     # --- rate limiter ---
-    limiter: _RateLimiter | None = None
+    limiter: RateLimiter | None = None
     try:
-        count, seconds = _parse_rate_limit(settings.rate_limit)
-        limiter = _RateLimiter(count, seconds)
-        logger.info("Rate limit enabled: %s", settings.rate_limit)
+        parsed = parse_rate_limit(settings.rate_limit)
+        if parsed is not None:
+            count, seconds = parsed
+            limiter = RateLimiter(count, seconds)
+            logger.info("Rate limit enabled: %s", settings.rate_limit)
+        else:
+            logger.info("Rate limiting disabled")
     except ValueError:
         logger.warning(
             "Invalid SENTIMENTA_RATE_LIMIT %r — rate limiting disabled",
@@ -171,16 +187,31 @@ def create_app() -> FastAPI:
         redoc_url=redoc_url,
         openapi_url=openapi_url,
     )
-    app.state.limiter = limiter
 
+    app.state.limiter = limiter
+    app.state.trust_proxy = settings.trust_proxy
+    app.state.max_body_bytes = settings.max_body_bytes
+    app.state.max_queue_wait_seconds = settings.max_queue_wait_seconds
+    app.state.concurrency_sem = (
+        asyncio.Semaphore(settings.max_concurrent_requests)
+        if settings.max_concurrent_requests > 0
+        else None
+    )
+
+    # Middleware are applied innermost-first: the last one added is the
+    # outermost.  We want CORS and the security headers to wrap every
+    # response (including 413/429/503), so they are added last.
+    app.add_middleware(BaseHTTPMiddleware, dispatch=enforce_rate_limit)
+    app.add_middleware(BaseHTTPMiddleware, dispatch=limit_concurrency)
+    app.add_middleware(BaseHTTPMiddleware, dispatch=enforce_body_size)
+    app.add_middleware(BaseHTTPMiddleware, dispatch=add_security_headers)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_origins,
         allow_methods=["GET", "POST", "OPTIONS"],
         allow_headers=["Content-Type"],
     )
-    app.add_middleware(BaseHTTPMiddleware, dispatch=add_security_headers)
-    app.add_middleware(BaseHTTPMiddleware, dispatch=add_rate_limiting)
+
     app.add_exception_handler(AppError, app_error_handler)  # type: ignore[arg-type]
     app.add_exception_handler(
         RequestValidationError, validation_error_handler  # type: ignore[arg-type]

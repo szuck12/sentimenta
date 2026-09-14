@@ -64,7 +64,6 @@ def health(
     return HealthResponse(
         status="ok",
         version=settings.version,
-        model_id=settings.model_id,
         model_loaded=models.is_loaded,
     )
 

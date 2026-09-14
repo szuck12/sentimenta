@@ -40,6 +40,17 @@ class OffsetPrediction:
 MAX_INPUT_TOKENS = 256
 
 
+def _sha256_file(path: str, chunk_size: int = 1024 * 1024) -> str:
+    """Return the hexadecimal SHA-256 digest of the file at ``path``."""
+    import hashlib
+
+    digest = hashlib.sha256()
+    with open(path, "rb") as handle:
+        for chunk in iter(lambda: handle.read(chunk_size), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
 class EmotionModelService:
     """Loads and serves the multi-label GoEmotions classifier.
 
@@ -75,6 +86,33 @@ class EmotionModelService:
         """Whether the model weights are loaded and ready."""
         return self.model is not None and self.tokenizer is not None
 
+    def _verify_weights(self, revision: str | None) -> None:
+        """Verify the safetensors file against the pinned SHA-256.
+
+        The file is resolved through the Hugging Face cache so the
+        digest is computed on the exact artifact that will be loaded.
+
+        Raises:
+            RuntimeError: If the digest does not match ``model_sha256``.
+        """
+        expected = self.settings.model_sha256
+        if not expected:
+            return
+        from huggingface_hub import hf_hub_download
+
+        path = hf_hub_download(
+            repo_id=self.settings.model_id,
+            filename="model.safetensors",
+            revision=revision,
+        )
+        actual = _sha256_file(path)
+        if actual != expected:
+            raise RuntimeError(
+                "Model weight integrity check failed: expected "
+                f"{expected}, got {actual}"
+            )
+        logger.info("Model weights verified (sha256=%s...)", actual[:12])
+
     def load(self) -> None:
         """Download (once, then cache) and prepare the model.
 
@@ -98,6 +136,7 @@ class EmotionModelService:
                 self.settings.model_revision or "main",
             )
             revision = self.settings.model_revision or None
+            self._verify_weights(revision)
             self.tokenizer = AutoTokenizer.from_pretrained(
                 self.settings.model_id,
                 revision=revision,

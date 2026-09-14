@@ -84,8 +84,7 @@ Returns service liveness and model status.
 ```json
 {
   "status": "ok",
-  "version": "1.3.0",
-  "model_id": "SamLowe/roberta-base-go_emotions",
+  "version": "1.3.1",
   "model_loaded": true
 }
 ```
@@ -94,7 +93,6 @@ Returns service liveness and model status.
 |-------|------|-------------|
 | `status` | string | Always `"ok"` when the server is reachable. |
 | `version` | string | Application version from `Settings.version`. |
-| `model_id` | string | Hugging Face model identifier. |
 | `model_loaded` | boolean | `true` when the model weights are loaded and ready. |
 
 ---

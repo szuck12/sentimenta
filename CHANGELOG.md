@@ -5,6 +5,48 @@ All notable changes to this project are documented in this file.
 The format follows [Keep a Changelog](https://keepachangelog.com) and this
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.1] - 2026-09-13
+
+### Added
+
+- **Model weight integrity verification** — the downloaded safetensors
+  file is checked against a pinned SHA-256 (`SENTIMENTA_MODEL_SHA256`)
+  before the model is loaded.
+- **Request body size limit** — requests whose declared `Content-Length`
+  exceeds `SENTIMENTA_MAX_BODY_BYTES` (default 64 KB) are rejected with
+  HTTP 413.
+- **Concurrency cap** — analysis requests are limited to
+  `SENTIMENTA_MAX_CONCURRENT_REQUESTS` (default 4); excess requests queue
+  briefly and then receive HTTP 503.
+- **Trusted-proxy client IP** — `SENTIMENTA_TRUST_PROXY` derives the
+  client IP from `X-Forwarded-For`/`X-Real-IP` when the app runs behind a
+  trusted reverse proxy.
+
+### Changed
+
+- **Rate limiter rewritten** — now a thread-safe, per-key sliding window
+  that prunes expired timestamps and bounds memory with LRU key eviction
+  (previously a single unscoped list with an O(N) scan).
+- **Middleware ordering fixed** — CORS and security headers now wrap the
+  rate limiter, body-size, and concurrency middleware, so 413/429/503
+  responses also carry CORS and security headers, and preflight requests
+  are no longer counted against the limit.
+- **`SENTIMENTA_RATE_LIMIT` is validated at startup** — malformed values
+  fail fast instead of silently disabling limiting.
+- **`SENTIMENTA_MAX_TEXT_CHARS` is enforced by the service** in addition
+  to the request schema, so lowering it actually tightens the bound.
+
+### Removed
+
+- **Unused `slowapi` dependency** — the custom limiter is used instead,
+  removing `slowapi`, `limits`, `deprecated`, and `wrapt` from the
+  runtime dependency tree.
+
+### Security
+
+- **Health endpoint no longer discloses `model_id`** to unauthenticated
+  callers, reducing fingerprinting.
+
 ## [1.3.0] - 2026-09-13
 
 ### Added

@@ -85,19 +85,29 @@ available. Please refrain from public disclosure before a fix ships.
 - CI runs with a **read-only** `GITHUB_TOKEN`, actions are pinned to commit
   SHAs, and checkout credentials are not persisted.
 - The model is loaded from an **immutable commit revision**
-  (`SENTIMENTA_MODEL_REVISION`) and only through **safetensors**, never
+  (`SENTIMENTA_MODEL_REVISION`), only through **safetensors**, never
   through pickle-based weights or remote code (`trust_remote_code` is not
-  enabled).
+  enabled), and the weights are **SHA-256 verified** against
+  `SENTIMENTA_MODEL_SHA256` on load.
 - The API exposes no file-serving, form-upload, or static-file routes, which
   keeps large classes of framework advisories unreachable.
 
 ## Production Recommendations
 
 - Set `SENTIMENTA_ENABLE_DOCS=false` to hide `/docs`, `/redoc`, and
-  `/openapi.json`.
-- Enforce **rate limiting** at the reverse proxy or hosting platform: model
-  inference (especially token attribution) is CPU-intensive, and the API is
-  intentionally unauthenticated.
+  `/openapi.json` (the default).
+- The app ships an in-process per-client rate limiter
+  (`SENTIMENTA_RATE_LIMIT`) and a concurrency cap
+  (`SENTIMENTA_MAX_CONCURRENT_REQUESTS`) as defense in depth, but you should
+  still enforce rate limiting at the reverse proxy or hosting platform:
+  model inference (especially token attribution) is CPU-intensive, and the
+  API is intentionally unauthenticated.
+- When running behind a reverse proxy, set `SENTIMENTA_TRUST_PROXY=true`
+  **only** if the proxy overwrites `X-Forwarded-For`/`X-Real-IP`; otherwise
+  clients can spoof their address and defeat rate limiting. Never enable it
+  when the app is directly reachable.
+- Keep `SENTIMENTA_MAX_BODY_BYTES` set so oversized bodies are rejected
+  before they are buffered; also cap the body size at the proxy.
 - Terminate TLS at a trusted proxy and forward only the required headers.
 - Avoid logging request bodies; the application logs only aggregate
   metadata.
