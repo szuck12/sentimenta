@@ -6,6 +6,10 @@
 
 ## Done
 
+- [x] 2026-09-13 — v1.3.3 — Explanation summary rewritten as a
+      descriptive narrative; primary percentage derived from the same
+      full-spectrum distribution used by the Emotion Mix and Full
+      Spectrum (#backend, #frontend)
 - [x] 2026-09-14 — v1.3.3 — Full Spectrum now derives one 100%-summing
       distribution shared by the Emotion Mix and primary emotion, and
       evidence words return one to five key phrases (#frontend, #model)

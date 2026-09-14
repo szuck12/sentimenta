@@ -84,7 +84,7 @@ Returns service liveness and model status.
 ```json
 {
   "status": "ok",
-  "version": "1.3.3",
+  "version": "1.4.0",
   "model_loaded": true
 }
 ```
@@ -369,14 +369,15 @@ Returns the full GoEmotions taxonomy with Sentimenta display metadata.
     }
   },
   "explanation": {
-    "summary": "Sentimenta detected excitement (78% confidence), alongside signals of joy and optimism. The highlighted words contributed most toward that reading.",
+    "summary": "The text conveys enthusiasm and eager anticipation (37%), alongside happiness and delight (30%) and hopefulness that things will work out well (17%).",
     "signals": [
       { "text": "finally got the job", "weight": 0.512 },
       { "text": "hoping for", "weight": 0.324 },
       { "text": "!", "weight": 0.164 }
     ],
     "method": "integrated_gradients",
-    "target_label": "excitement"
+    "target_label": "excitement",
+    "target_percentage": 37
   },
   "sentences": [],
   "metadata": {
@@ -561,22 +562,24 @@ probabilities. Shares are normalized to sum to 1.0.
 
 ```json
 {
-  "summary": "Sentimenta detected joy (85% confidence).",
+  "summary": "The text conveys happiness and delight (37%), alongside enthusiasm and eager anticipation (30%).",
   "signals": [
     { "text": "so happy", "weight": 0.65 },
     { "text": "finally", "weight": 0.35 }
   ],
   "method": "integrated_gradients",
-  "target_label": "joy"
+  "target_label": "joy",
+  "target_percentage": 37
 }
 ```
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `summary` | string | Template-generated factual description from model outputs. |
+| `summary` | string | Descriptive 1–3 sentence narrative naming the primary emotion, its percentage, and (if ≥ 10%) the secondary emotions with theirs. |
 | `signals` | EvidenceSignal[] | Between one and five key phrases with normalized weights. Empty only when there are no word tokens. |
 | `method` | string | `"integrated_gradients"` or `"probabilities"`. |
 | `target_label` | string | The primary emotion being explained. |
+| `target_percentage` | integer | Primary emotion's share of the derived full-spectrum distribution (sums to 100 with all 28). Matches the Emotion Mix and Full Spectrum. |
 
 ### EvidenceSignal
 

@@ -63,7 +63,10 @@ class Explanation(BaseModel):
     """Model-derived evidence plus a carefully-worded interpretation.
 
     The ``summary`` is template-generated strictly from model outputs;
-    ``signals`` come from token attribution when available.
+    ``signals`` come from token attribution when available.  The
+    ``target_percentage`` is the primary emotion's whole-number share of
+    the derived 28-emotion distribution (always summing to 100 across
+    the full spectrum), matching the Emotion Mix and Full Spectrum.
     """
 
     summary: str
@@ -75,6 +78,13 @@ class Explanation(BaseModel):
         )
     )
     target_label: Emotion
+    target_percentage: int = Field(
+        description=(
+            "Whole-number share (0-100) of the primary emotion in the "
+            "derived full-spectrum distribution.  Matches the Emotion "
+            "Mix and Full Spectrum displays."
+        )
+    )
 
 
 class SentenceAnalysis(BaseModel):

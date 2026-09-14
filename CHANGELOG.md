@@ -18,6 +18,16 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **Evidence words** — token attribution now returns between **one and
   five** key phrases (previously up to three). The strongest word is
   always included, even when no word has positive attribution.
+- **Primary-emotion percentage** now comes from the same derived
+  full-spectrum distribution used by the Emotion Mix and Full Spectrum,
+  so every percentage displayed across the three views agrees.
+- **Explanation summary** rewritten as a descriptive 1-3 sentence
+  narrative that names the primary emotion with its normalized
+  percentage and weaves in the second and third most prevalent emotions
+  (if ≥ 10% each) with their descriptions and percentages — replacing
+  the old "Sentimenta detected X (Y% confidence)" template.
+- **`Explanation` schema** now carries a `target_percentage` field so the
+  backend and frontend always share the authoritative value.
 
 ## [1.3.2] - 2026-09-14
 

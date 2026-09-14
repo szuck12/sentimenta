@@ -31,6 +31,7 @@ export interface Explanation {
   signals: EvidenceSignal[]
   method: 'integrated_gradients' | 'probabilities'
   target_label: string
+  target_percentage: number
 }
 
 export interface ProfileShares {

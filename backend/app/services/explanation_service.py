@@ -23,6 +23,66 @@ logger = logging.getLogger(__name__)
 # strongest word are not treated as evidence.
 _SIGNAL_CUTOFF_RATIO = 0.15
 
+# Human-readable labels for each emotion, used in the summary narrative.
+_EMOTION_DESCRIPTIONS: dict[str, str] = {
+    "admiration": "admiration for something impressive",
+    "amusement": "amusement or entertainment",
+    "anger": "strong displeasure or frustration",
+    "annoyance": "irritation or being bothered",
+    "approval": "agreement with or endorsement of something",
+    "caring": "warmth, concern, or compassion",
+    "confusion": "uncertainty or lack of clarity",
+    "curiosity": "a desire to learn or know more",
+    "desire": "wanting or longing for something",
+    "disappointment": "let-down from unmet expectations",
+    "disapproval": "objection or disagreement",
+    "disgust": "repulsion or being put off",
+    "embarrassment": "awkwardness or self-consciousness",
+    "excitement": "enthusiasm and eager anticipation",
+    "fear": "apprehension or worry about something threatening",
+    "gratitude": "thankfulness and appreciation",
+    "grief": "deep sorrow, often from loss",
+    "joy": "happiness and delight",
+    "love": "deep affection and attachment",
+    "nervousness": "anxiety or unease about what may happen",
+    "optimism": "hopefulness that things will work out well",
+    "pride": "satisfaction in achievements or qualities",
+    "realization": "a moment of sudden understanding",
+    "relief": "ease after a worry or difficulty has passed",
+    "remorse": "regret or guilt about something done",
+    "sadness": "unhappiness or sorrow",
+    "surprise": "being startled by the unexpected",
+    "neutral": "no strong emotional signal",
+}
+
+
+def _score_to_percentage(scores: dict[Emotion, float]) -> dict[Emotion, int]:
+    """Convert model scores to whole-number percentages summing to 100.
+
+    Uses the largest-remainder (Hamilton) method: every score is
+    scaled to its share of the total, floored, and the leftover
+    points are handed to the emotions with the largest fractional
+    parts.  The result is deterministic and mirrors the algorithm
+    used by the frontend's ``toWholePercentages``.
+    """
+    sorted_emotions = sorted(scores.keys(), key=lambda e: e.value)
+    values = [scores[e] for e in sorted_emotions]
+    total = sum(values)
+    if total <= 0:
+        return {e: 0 for e in scores}
+    exact = [(v / total) * 100 for v in values]
+    result = [int(v) for v in exact]
+    used = sum(result)
+    remainder = 100 - used
+    order = sorted(
+        range(len(exact)),
+        key=lambda i: exact[i] - int(exact[i]),
+        reverse=True,
+    )
+    for i in range(remainder):
+        result[order[i]] += 1
+    return {e: p for e, p in zip(sorted_emotions, result)}
+
 
 class ExplanationService:
     """Produces explanations grounded in model-derived evidence.
@@ -51,18 +111,28 @@ class ExplanationService:
                 the primary inference pass.
 
         Returns:
-            An Explanation with the target label, a factual summary,
-            and (when available) attributed key-signal phrases.
+            An Explanation with the target label, its normalized
+            percentage (matching the Emotion Mix / Full Spectrum), a
+            factual summary, and (when available) attributed key-signal
+            phrases.
         """
         ranked = sorted(
             prediction_scores.items(), key=lambda kv: (-kv[1], kv[0])
         )
-        target, target_score = ranked[0]
-        others = [e for e, s in ranked[1:] if s >= self.settings.emotion_threshold][:2]
+        target, _target_score = ranked[0]
+
+        # Derive the same whole-number percentages the frontend uses.
+        pct_map = _score_to_percentage(prediction_scores)
+        target_pct = pct_map[target]
+        others_pct: list[tuple[Emotion, int]] = [
+            (emotion, pct_map[emotion])
+            for emotion, _score in ranked[1:]
+            if pct_map[emotion] >= 10
+        ][:2]
 
         if not self.settings.enable_attribution or not self.models.is_loaded:
             return self._probability_explanation(
-                target, target_score, others
+                target, target_pct, others_pct
             )
 
         try:
@@ -70,65 +140,76 @@ class ExplanationService:
         except Exception as exc:
             logger.warning("Token attribution failed: %s", exc)
             return self._probability_explanation(
-                target, target_score, others
+                target, target_pct, others_pct
             )
 
         return Explanation(
-            summary=self._summary(target, target_score, others, True),
+            summary=self._summary(target, target_pct, others_pct, True),
             signals=signals,
             method="integrated_gradients",
             target_label=target,
+            target_percentage=target_pct,
         )
 
     def _probability_explanation(
         self,
         target: Emotion,
-        target_score: float,
-        others: list[Emotion],
+        target_pct: int,
+        others_pct: list[tuple[Emotion, int]],
     ) -> Explanation:
         """Build the fallback explanation from probabilities alone."""
         return Explanation(
-            summary=self._summary(target, target_score, others, False),
+            summary=self._summary(target, target_pct, others_pct, False),
             signals=[],
             method="probabilities",
             target_label=target,
+            target_percentage=target_pct,
         )
 
     def _summary(
         self,
         target: Emotion,
-        target_score: float,
-        others: list[Emotion],
+        target_pct: int,
+        others_pct: list[tuple[Emotion, int]],
         has_signals: bool,
     ) -> str:
-        """Render the human-facing summary without fabricating cause.
+        """Render a 1-3 sentence descriptive summary.
+
+        The summary names the primary emotion with its percentage and
+        describes the emotional tone of the text.  If other emotions are
+        prevalent (≥ 10 % share) they are woven into the narrative to
+        paint a fuller picture.
 
         Args:
             target: Primary emotion label.
-            target_score: Its probability.
-            others: Up to two further detected emotions.
+            target_pct: Its normalized percentage (0-100).
+            others_pct: Secondary emotions with their percentages,
+                already sorted descending and filtered ≥ 10 %.
             has_signals: Whether token evidence is included below.
 
         Returns:
-            A one-to-two-sentence factual description.
+            A concise, factual 1-3 sentence description.
         """
-        pct = round(target_score * 100)
-        parts = [f"Sentimenta detected {target.value} ({pct}% confidence)"]
-        if others:
-            names = " and ".join(e.value for e in others)
-            parts.append(f"alongside signals of {names}")
-        summary = ", ".join(parts) + "."
-        if has_signals:
-            summary += (
-                " The highlighted words contributed most toward "
-                "that reading."
-            )
-        else:
-            summary += (
-                " Token-level evidence is unavailable for this "
-                "input."
-            )
-        return summary
+        primary_desc = _EMOTION_DESCRIPTIONS.get(
+            target.value, target.value
+        )
+        primary_clause = (
+            f"The text conveys {primary_desc} ({target_pct}%)"
+        )
+
+        if not others_pct:
+            return f"{primary_clause}."
+
+        if len(others_pct) == 1:
+            e, pct = others_pct[0]
+            sec_desc = _EMOTION_DESCRIPTIONS.get(e.value, e.value)
+            return f"{primary_clause}, along with {sec_desc} ({pct}%)."
+
+        e1, pct1 = others_pct[0]
+        e2, pct2 = others_pct[1]
+        d1 = _EMOTION_DESCRIPTIONS.get(e1.value, e1.value)
+        d2 = _EMOTION_DESCRIPTIONS.get(e2.value, e2.value)
+        return f"{primary_clause}, {d1} ({pct1}%), and {d2} ({pct2}%)."
 
     def _attribute(
         self, text: str, target: Emotion

@@ -88,6 +88,7 @@ class StubAnalysisService(AnalysisService):
                 signals=[],
                 method="probabilities",
                 target_label=Emotion.JOY,
+                target_percentage=85,
             ),
             sentences=[],
             metadata={

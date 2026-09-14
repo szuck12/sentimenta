@@ -1,6 +1,6 @@
 # Sentimenta
 
-Current version: **1.3.3** — [Changelog](CHANGELOG.md)
+Current version: **1.4.0** — [Changelog](CHANGELOG.md)
 
 Understand the emotions and sentiment inside text.
 

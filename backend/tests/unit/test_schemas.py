@@ -56,7 +56,8 @@ def test_evidence_signal_rejects_out_of_range(weight: float) -> None:
 
 def test_explanation_defaults_to_no_signals() -> None:
     explanation = Explanation(
-        summary="s", method="probabilities", target_label=Emotion.JOY
+        summary="s", method="probabilities", target_label=Emotion.JOY,
+        target_percentage=50,
     )
     assert explanation.signals == []
 

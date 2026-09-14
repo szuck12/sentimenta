@@ -38,6 +38,7 @@ export function makeAnalyzeResponse(
       signals: [{ text: 'love', weight: 1.0 }],
       method: 'integrated_gradients',
       target_label: 'joy',
+      target_percentage: 54,
     },
     sentences: [
       {

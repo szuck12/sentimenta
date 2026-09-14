@@ -8,7 +8,7 @@ import pytest
 
 from app.core.config import Settings
 from app.core.emotions import Emotion
-from app.services.explanation_service import ExplanationService
+from app.services.explanation_service import ExplanationService, _score_to_percentage
 
 
 class FakeModelService:
@@ -43,8 +43,9 @@ def test_probability_fallback_when_attribution_disabled() -> None:
     assert explanation.method == "probabilities"
     assert explanation.signals == []
     assert explanation.target_label is Emotion.JOY
-    assert "joy" in explanation.summary
-    assert "Token-level evidence is unavailable" in explanation.summary
+    assert "happiness" in explanation.summary
+    assert explanation.target_percentage == 53
+    assert "Token-level evidence is unavailable" not in explanation.summary
 
 
 def test_probability_fallback_when_model_not_loaded() -> None:
@@ -71,7 +72,7 @@ def test_attribution_failure_falls_back(
     assert explanation.signals == []
 
 
-def test_attribution_success_mentions_highlights(
+def test_attribution_success_mentions_emotion(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     service = ExplanationService(  # type: ignore[arg-type]
@@ -80,23 +81,35 @@ def test_attribution_success_mentions_highlights(
     monkeypatch.setattr(service, "_attribute", lambda text, target: [])
     explanation = service.explain("hello", _scores())
     assert explanation.method == "integrated_gradients"
-    assert "highlighted words" in explanation.summary
+    assert "happiness" in explanation.summary
+    assert "53%" in explanation.summary
 
 
-def test_summary_lists_secondary_emotions() -> None:
+def test_summary_includes_secondary_emotions() -> None:
     service = ExplanationService(  # type: ignore[arg-type]
         FakeModelService(), _settings(enable_attribution=False)
     )
     explanation = service.explain("hello", _scores(joy=0.80, anger=0.40))
-    assert "anger" in explanation.summary
+    # After normalization, anger ≈ 27% (≥ 10%) so it appears in the summary.
+    assert "frustration" in explanation.summary
+    assert "27%" in explanation.summary
 
 
-def test_summary_percentage_rounds() -> None:
+def test_summary_percentage_matches_derived_distribution() -> None:
     service = ExplanationService(  # type: ignore[arg-type]
         FakeModelService(), _settings(enable_attribution=False)
     )
     explanation = service.explain("hello", _scores(joy=0.876, anger=0.01))
-    assert "88% confidence" in explanation.summary
+    # Primary's normalized share = 74%; should appear in the summary.
+    assert "74%" in explanation.summary
+    assert explanation.target_percentage == 74
+
+
+def test_score_to_percentage_sums_to_100() -> None:
+    pct_map = _score_to_percentage(_scores())
+    total = sum(pct_map.values())
+    assert total == 100
+    assert all(isinstance(v, int) and v >= 0 for v in pct_map.values())
 
 
 def test_words_to_signals_merges_adjacent_words() -> None:
