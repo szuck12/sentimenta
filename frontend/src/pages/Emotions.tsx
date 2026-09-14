@@ -5,6 +5,7 @@
 import { useEffect, useState } from 'react'
 import { Card } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
+import { Button } from '@/components/ui/Button'
 import { fetchEmotions } from '@/lib/api'
 import type { EmotionInfo, EmotionsResponse } from '@/lib/types'
 
@@ -17,10 +18,28 @@ const GROUP_COLORS: Record<string, string> = {
 
 export function Emotions() {
   const [data, setData] = useState<EmotionsResponse | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    fetchEmotions().then(setData).catch(() => {})
+    fetchEmotions()
+      .then(setData)
+      .catch(() => setError('Failed to load emotions. Please try again.'))
   }, [])
+
+  if (error && !data) {
+    return (
+      <main className="max-w-4xl mx-auto px-6 py-12">
+        <div className="text-center text-red-600 py-20">
+          {error}
+        </div>
+        <div className="text-center">
+          <Button onClick={() => window.location.reload()} variant="secondary">
+            Retry
+          </Button>
+        </div>
+      </main>
+    )
+  }
 
   if (!data) {
     return (

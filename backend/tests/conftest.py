@@ -29,6 +29,7 @@ def _make_settings(**overrides: object) -> Settings:
         emotion_threshold=0.30,
         enable_attribution=False,
         device="cpu",
+        rate_limit="0",  # disable rate limiting in tests
     )
     defaults.update(overrides)  # type: ignore[arg-type]
     return Settings(**defaults)

@@ -58,7 +58,7 @@ Check readiness:
 
 ```bash
 curl http://localhost:8000/api/health
-# {"status":"ok","version":"1.2.0","model_id":"SamLowe/roberta-base-go_emotions","model_loaded":true}
+# {"status":"ok","version":"1.3.0","model_id":"SamLowe/roberta-base-go_emotions","model_loaded":true}
 ```
 
 ---

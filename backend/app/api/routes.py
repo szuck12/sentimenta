@@ -29,19 +29,22 @@ router = APIRouter(prefix="/api")
 
 def get_settings() -> Settings:
     """FastAPI dependency returning the cached settings."""
-    assert _settings is not None
+    if _settings is None:
+        raise RuntimeError("Settings not initialised")
     return _settings
 
 
 def get_analysis_service() -> AnalysisService:
     """FastAPI dependency returning the app-level analysis service."""
-    assert _analysis_service is not None
+    if _analysis_service is None:
+        raise RuntimeError("AnalysisService not initialised")
     return _analysis_service
 
 
 def get_model_service() -> EmotionModelService:
     """FastAPI dependency returning the app-level model service."""
-    assert _model_service is not None
+    if _model_service is None:
+        raise RuntimeError("ModelService not initialised")
     return _model_service
 
 

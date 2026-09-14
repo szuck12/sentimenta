@@ -1,6 +1,6 @@
 # Sentimenta
 
-Current version: **1.2.0** — [Changelog](CHANGELOG.md)
+Current version: **1.3.0** — [Changelog](CHANGELOG.md)
 
 Understand what your words are feeling.
 

@@ -3,6 +3,7 @@
 
 from functools import lru_cache
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -16,7 +17,8 @@ class Settings(BaseSettings):
     Attributes:
         app_name: Human-readable service name used in docs/health.
         version: Current release version, mirrored from CHANGELOG.md.
-        cors_origins: Origins allowed by the CORS middleware.
+        cors_origins: Origins allowed by the CORS middleware.  Wildcard
+            origins are rejected.
         max_text_chars: Maximum accepted input length in characters,
             enforced identically by the frontend counter.
         min_text_chars: Minimum accepted input length after trimming.
@@ -28,7 +30,7 @@ class Settings(BaseSettings):
             attribution. When disabled the explanation falls back to
             probability-based evidence only.
         attribution_steps: Number of integrated-gradient steps; higher
-            values are more accurate but slower.
+            values are more accurate but slower.  Capped at 32.
         attribution_max_tokens: Token sequences are truncated to this
             length before attribution to bound its cost.
         model_id: Hugging Face model identifier for the GoEmotions
@@ -40,8 +42,10 @@ class Settings(BaseSettings):
         device: Torch device string ("cpu" or "mps"); empty selects
             automatically.
         enable_docs: Whether to expose the interactive API docs
-            (`/docs`, `/redoc`) and the OpenAPI schema. Disable in
-            production to reduce the exposed surface.
+            (``/docs``, ``/redoc``) and the OpenAPI schema.  Disabled
+            by default to reduce the exposed surface.
+        rate_limit: Per-IP rate limit (e.g. ``'30/minute'``).  Set
+            to ``'0'`` or leave blank to disable.
         log_level: Uvicorn/loguru-free stdlib logging level.
     """
 
@@ -50,7 +54,7 @@ class Settings(BaseSettings):
     )
 
     app_name: str = "Sentimenta API"
-    version: str = "1.2.0"
+    version: str = "1.3.0"
 
     cors_origins: list[str] = [
         "http://localhost:5173",
@@ -73,9 +77,40 @@ class Settings(BaseSettings):
     model_revision: str = "d75048347613a25d77de8cf6412eaae9fa7b26be"
     device: str = ""
 
-    enable_docs: bool = True
+    enable_docs: bool = False
+
+    rate_limit: str = "30/minute"
 
     log_level: str = "INFO"
+
+    @field_validator("attribution_steps")
+    @classmethod
+    def _validate_attribution_steps(cls, v: int) -> int:
+        if v < 0 or v > 32:
+            raise ValueError(
+                f"attribution_steps must be between 0 and 32, got {v}"
+            )
+        return v
+
+    @field_validator("sentence_limit")
+    @classmethod
+    def _validate_sentence_limit(cls, v: int) -> int:
+        if v < 1 or v > 20:
+            raise ValueError(
+                f"sentence_limit must be between 1 and 20, got {v}"
+            )
+        return v
+
+    @field_validator("cors_origins")
+    @classmethod
+    def _reject_wildcard_cors(cls, v: list[str]) -> list[str]:
+        for origin in v:
+            if origin.strip() == "*":
+                raise ValueError(
+                    "CORS wildcard '*' is not allowed. "
+                    "Use explicit origins instead."
+                )
+        return v
 
 
 @lru_cache

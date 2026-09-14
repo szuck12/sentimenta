@@ -6,6 +6,10 @@
 
 ## Done
 
+- [x] 2026-09-13 — v1.3.0 — security hardening round two: rate
+      limiting, field validation, CORS wildcard guard, safer defaults,
+      hardened dependency guards, frontend error states, and pinned
+      npm dependency ranges (#security, #frontend)
 - [x] 2026-09-13 — v1.2.0 — security hardening and public-release prep:
       zero-vulnerability dependency upgrades, pinned model revision,
       security headers, docs toggle, CI audits and supply-chain

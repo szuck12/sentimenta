@@ -5,6 +5,46 @@ All notable changes to this project are documented in this file.
 The format follows [Keep a Changelog](https://keepachangelog.com) and this
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-09-13
+
+### Added
+
+- **In-process rate limiting** — per-IP sliding-window rate limiter on
+  every endpoint (default 30 requests/minute, configurable via
+  `SENTIMENTA_RATE_LIMIT`).
+- **Field validation** — `attribution_steps` (0–32) and `sentence_limit`
+  (1–20) are now bounded via Pydantic validators; invalid environment
+  values are caught at startup.
+- **CORS wildcard guard** — the `cors_origins` setting rejects `"*"`
+  at validation time to prevent accidental open-origin misconfiguration.
+- **Graceful error state on Emotions page** — the frontend now shows an
+  error message and retry button if the emotions API call fails instead
+  of showing "Loading…" indefinitely.
+
+### Changed
+
+- **`enable_docs` defaults to `False`** — `/docs`, `/redoc`, and
+  `/openapi.json` are hidden by default in production.
+- **`SENTIMENTA_HOST` defaults to `127.0.0.1`** in `.env.example`,
+  with a comment explaining that containers should override to
+  `0.0.0.0`.
+- **CORS narrowed** — `allow_methods` and `allow_headers` restricted
+  to `["GET","POST","OPTIONS"]` and `["Content-Type"]` respectively.
+- **Logging respects the setting** — `basicConfig` is now applied
+  inside the lifespan using the operator's `SENTIMENTA_LOG_LEVEL`.
+- **Dependency guards hardened** — runtime `assert` statements in
+  `routes.py` replaced with explicit `RuntimeError` raises.
+- **Frontend dependencies pinned** — `react-router-dom`, `vite`,
+  `vitest`, `@vitest/coverage-v8`, and `postcss` are now exact-pinned
+  (no caret ranges).
+- **Pre-commit prettier hook** switched from deprecated alpha mirror to
+  a stable mirror (`rbubley/mirrors-prettier` v3.9.6).
+
+### Fixed
+
+- **Rate limiter counted unique keys instead of hits** — the sliding
+  window now stores all request timestamps per key.
+
 ## [1.2.0] - 2026-09-13
 
 ### Added

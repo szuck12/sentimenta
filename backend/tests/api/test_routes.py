@@ -200,22 +200,35 @@ async def test_security_headers_present(client: httpx.AsyncClient) -> None:
     assert resp.headers.get("x-frame-options") == "DENY"
 
 
-async def test_docs_available_by_default(client: httpx.AsyncClient) -> None:
-    assert (await client.get("/openapi.json")).status_code == 200
+async def test_docs_disabled_by_default(client: httpx.AsyncClient) -> None:
+    assert (await client.get("/openapi.json")).status_code == 404
+    assert (await client.get("/docs")).status_code == 404
 
 
-async def test_docs_can_be_disabled(
+async def test_docs_can_be_enabled(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     from app.main import create_app
 
     monkeypatch.setattr(
-        "app.main.get_settings", lambda: Settings(enable_docs=False)
+        "app.main.get_settings", lambda: Settings(enable_docs=True)
     )
     application = create_app()
     transport = httpx.ASGITransport(app=application)
     async with httpx.AsyncClient(
         transport=transport, base_url="http://test"
     ) as ac:
-        assert (await ac.get("/docs")).status_code == 404
-        assert (await ac.get("/openapi.json")).status_code == 404
+        assert (await ac.get("/openapi.json")).status_code == 200
+        assert (await ac.get("/docs")).status_code == 200
+
+
+async def test_rate_limiter_blocks_after_limit() -> None:
+    """Test the rate limiter logic directly."""
+    from app.main import _RateLimiter
+
+    limiter = _RateLimiter(limit=1, window_seconds=60.0)
+    assert limiter.is_limited("1.2.3.4") is False  # 0 prior ≤ 1 → allowed
+    assert limiter.is_limited("1.2.3.4") is False  # 1 prior ≤ 1 → allowed
+    assert limiter.is_limited("1.2.3.4") is True   # 2 prior > 1 → blocked
+    # Different IPs are independent
+    assert limiter.is_limited("5.6.7.8") is False

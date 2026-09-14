@@ -23,4 +23,27 @@ describe('Emotions', () => {
     expect(screen.getByText(/Positive & affiliative/)).toBeInTheDocument()
     expect(screen.getByText(/Negative & heavy/)).toBeInTheDocument()
   })
+
+  it('shows an error message when the fetch fails', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() => jsonResponse({}, 500)),
+    )
+    render(<Emotions />)
+    expect(
+      await screen.findByText(/failed to load emotions/i),
+    ).toBeInTheDocument()
+  })
+
+  it('shows a retry button after error', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() => jsonResponse({}, 500)),
+    )
+    render(<Emotions />)
+    await screen.findByText(/failed to load emotions/i)
+    expect(
+      screen.getByRole('button', { name: /retry/i }),
+    ).toBeInTheDocument()
+  })
 })
