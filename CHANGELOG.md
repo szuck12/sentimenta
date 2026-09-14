@@ -5,7 +5,7 @@ All notable changes to this project are documented in this file.
 The format follows [Keep a Changelog](https://keepachangelog.com) and this
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.3.3] - 2026-09-14
+## [1.3.2] - 2026-09-14
 
 ### Changed
 
@@ -23,11 +23,6 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   the dominant emotion, and the "Worry" chip was replaced with **"Fear"**
   (worry is not a GoEmotions label) with a sentence whose primary emotion
   is fear.
-
-## [1.3.2] - 2026-09-14
-
-### Fixed
-
 - **CI backend/model jobs failed on Linux** — `pip install torch==2.14.0`
   pulled the CUDA 13 build plus the ~7 GB NVIDIA/triton dependency stack
   on Linux runners, exhausting the runner's disk during installation.

@@ -9,7 +9,7 @@ from app.core.config import Settings, get_settings
 
 def test_settings_defaults() -> None:
     settings = Settings()
-    assert settings.version == "1.3.3"
+    assert settings.version == "1.3.2"
     assert settings.model_id == "SamLowe/roberta-base-go_emotions"
     assert len(settings.model_revision) == 40
     assert all(c in "0123456789abcdef" for c in settings.model_revision)

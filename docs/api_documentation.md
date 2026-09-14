@@ -84,7 +84,7 @@ Returns service liveness and model status.
 ```json
 {
   "status": "ok",
-  "version": "1.3.3",
+  "version": "1.3.2",
   "model_loaded": true
 }
 ```
