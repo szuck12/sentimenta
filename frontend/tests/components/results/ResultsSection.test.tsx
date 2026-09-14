@@ -3,6 +3,7 @@
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import { ResultsSection } from '@/components/results/ResultsSection'
+import { toWholePercentages } from '@/lib/utils'
 import { makeAnalyzeResponse } from '../../fixtures'
 
 describe('ResultsSection', () => {
@@ -32,6 +33,18 @@ describe('ResultsSection', () => {
     }
     // The sixth-ranked emotion is excluded from the mix.
     expect(screen.queryByText('Anger')).not.toBeInTheDocument()
+  })
+
+  it('shares the full-spectrum distribution with the primary and mix', () => {
+    const result = makeAnalyzeResponse()
+    render(<ResultsSection result={result} />)
+    const shares = toWholePercentages(result.all_emotions.map((e) => e.score))
+    const joyIndex = result.all_emotions.findIndex((e) => e.label === 'joy')
+    const joyPct = shares[joyIndex]
+    // The primary emotion's percentage is its share of the distribution.
+    expect(screen.getByText(`${joyPct}% confidence`)).toBeInTheDocument()
+    // The mix shows the same share for that emotion.
+    expect(screen.getByText(`${joyPct}%`)).toBeInTheDocument()
   })
 
   it('omits the journey card for single-sentence results', () => {

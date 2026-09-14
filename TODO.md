@@ -6,6 +6,9 @@
 
 ## Done
 
+- [x] 2026-09-14 — v1.3.3 — Full Spectrum now derives one 100%-summing
+      distribution shared by the Emotion Mix and primary emotion, and
+      evidence words return one to five key phrases (#frontend, #model)
 - [x] 2026-09-14 — v1.3.2 — CI fix (install CPU-only PyTorch in the
       backend and model jobs so Linux runners no longer pull the ~7 GB
       CUDA dependency stack) plus UI updates: Emotion Mix shows the top

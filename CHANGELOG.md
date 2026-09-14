@@ -5,6 +5,20 @@ All notable changes to this project are documented in this file.
 The format follows [Keep a Changelog](https://keepachangelog.com) and this
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.3] - 2026-09-14
+
+### Changed
+
+- **Full Spectrum distribution** — the percentages across all 28
+  emotions are now derived as a single whole-number distribution that
+  always sums to exactly 100% (largest-remainder rounding). The **Emotion
+  Mix** (top five) and the **primary emotion** percentage reuse those same
+  shares, so the three views always agree. The Emotion Mix is no longer
+  forced to sum to 100% on its own.
+- **Evidence words** — token attribution now returns between **one and
+  five** key phrases (previously up to three). The strongest word is
+  always included, even when no word has positive attribution.
+
 ## [1.3.2] - 2026-09-14
 
 ### Changed

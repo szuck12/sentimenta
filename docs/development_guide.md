@@ -58,7 +58,7 @@ Check readiness:
 
 ```bash
 curl http://localhost:8000/api/health
-# {"status":"ok","version":"1.3.2","model_loaded":true}
+# {"status":"ok","version":"1.3.3","model_loaded":true}
 ```
 
 ---

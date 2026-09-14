@@ -1,6 +1,6 @@
 # Sentimenta
 
-Current version: **1.3.2** — [Changelog](CHANGELOG.md)
+Current version: **1.3.3** — [Changelog](CHANGELOG.md)
 
 Understand the emotions and sentiment inside text.
 
@@ -9,6 +9,10 @@ powered by Google's GoEmotions dataset and the RoBERTa transformer
 architecture. Enter any text and receive a multi-emotion reading with
 confidence scores, evidence-based explanations, and an intuitive
 emotional profile.
+
+The frontend derives one whole-number percentage distribution across all
+28 emotions (summing to exactly 100%); the primary emotion, the emotion
+mix (top five), and the full spectrum all reuse those same shares.
 
 No paid APIs. No cloud ML services. The model runs entirely locally
 inside the backend.
@@ -24,7 +28,8 @@ of derived metrics that make the result easy to interpret. Highlights:
 - **Multi-label classification** — multiple emotions can score highly
   simultaneously, reflecting how real text actually feels.
 - **Evidence-based explanations** — token attribution (Captum integrated
-  gradients) identifies which words contributed most to the reading.
+  gradients) highlights the words that contributed most to the reading
+  (up to five key phrases).
 - **Emotional intensity** — a derived metric showing how emotionally
   charged your text is.
 - **Emotional profile** — grouped into positive, negative, cognitive,
@@ -32,7 +37,10 @@ of derived metrics that make the result easy to interpret. Highlights:
 - **Sentence-level analysis** — each sentence independently analyzed
   when text contains multiple sentences.
 - **Emotional journey** — visualize how emotions shift across your text.
-- **Full spectrum view** — all 28 emotions shown as interactive bars.
+- **Full spectrum view** — all 28 emotions shown as interactive bars,
+  with a percentage distribution that always sums to 100%. The emotion
+  mix and the primary-emotion percentage are slices of that same
+  distribution.
 - **Responsive design** — works beautifully on mobile, tablet, and
   desktop.
 - **Privacy-first** — your text is analyzed and returned; nothing is

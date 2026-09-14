@@ -61,8 +61,8 @@ Sentimenta is split into three logical layers:
 │   │   ├── <InputCard>                        # Form, Zod validation, examples
 │   │   ├── <LoadingState>                     # Animated dots + cycling messages
 │   │   ├── <ResultsSection>                   # Staggered framer-motion container
-│   │   │   ├── <PrimaryEmotionCard>           # SVG ring + emoji + confidence
-│   │   │   ├── <EmotionMixCard>               # Horizontal bars for detected emotions
+│   │   │   ├── <PrimaryEmotionCard>           # SVG ring + emoji + share percentage
+│   │   │   ├── <EmotionMixCard>               # Top five emotions with shared percentages
 │   │   │   ├── <ExplanationCard>              # Summary + evidence signal pills
 │   │   │   ├── <JourneyCard>                  # Vertical timeline (if sentences > 1)
 │   │   │   ├── <SpectrumCard>                 # Collapsible full 28-emotion bars
@@ -147,7 +147,7 @@ AnalysisService.analyze(text, include_sentences)
 8. `rank_emotions` sorts descending. `detected_emotions` filters at threshold 0.30.
 9. `compute_intensity` returns `1 - P(neutral)` with a band label.
 10. `compute_profile` sums member scores per group and normalizes to shares summing to 1.
-11. `ExplanationService.explain` runs Captum `LayerIntegratedGradients` against the primary emotion's output neuron, aggregates token attributions to words, merges adjacent words into phrases, and returns the top 3.
+11. `ExplanationService.explain` runs Captum `LayerIntegratedGradients` against the primary emotion's output neuron, aggregates token attributions to words, merges adjacent words into phrases, and returns the top 5 (between one and five).
 12. If `include_sentences` is true, `split_sentences` + batch `predict` produce per-sentence results (capped at `sentence_limit=10`).
 13. `AnalyzeResponse` is serialized and returned. Frontend renders the results section with staggered animations.
 

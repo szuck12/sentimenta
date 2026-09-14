@@ -211,12 +211,15 @@ can express joy, gratitude, and excitement at the same time.
 1. **Primary emotion**: The single highest-scoring label. Always shown
    prominently in the `PrimaryEmotionCard`.
 
-2. **Detected emotions**: All labels scoring at or above the threshold
-   (default 0.30). Shown in the `EmotionMixCard` with horizontal bars.
+2. **Emotion mix**: The five highest-scoring labels, shown in the
+   `EmotionMixCard` with horizontal bars. Each bar's width and percentage
+   come from the shared distribution described below.
 
-3. **Full spectrum**: All 28 labels sorted by score, shown in the
-   collapsible `SpectrumCard`. This lets users see the full picture,
-   including low-scoring emotions that may still be interesting.
+3. **Full spectrum**: All 28 labels shown in the collapsible
+   `SpectrumCard`. Their percentages form a single whole-number
+   distribution that always sums to exactly 100%. The emotion mix (top
+   five) and the primary-emotion percentage are slices of that same
+   distribution, so the three views always agree.
 
 ---
 

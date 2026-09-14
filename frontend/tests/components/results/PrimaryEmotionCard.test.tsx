@@ -10,7 +10,7 @@ function renderCard(
 ) {
   const props = {
     label: 'joy',
-    score: 0.85,
+    percentage: 85,
     summary: 'Detected joy.',
     intensity: { score: 0.9, label: 'high' },
     ...overrides,

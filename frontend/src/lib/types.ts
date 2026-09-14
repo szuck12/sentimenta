@@ -6,6 +6,16 @@ export interface EmotionScore {
   score: number
 }
 
+/**
+ * An emotion paired with its whole-number share of the derived
+ * distribution across all detected emotions. The shares across the full
+ * 28-emotion spectrum always sum to exactly 100.
+ */
+export interface EmotionPercentage {
+  label: string
+  percentage: number
+}
+
 export interface Intensity {
   score: number
   label: 'low' | 'moderate' | 'high'

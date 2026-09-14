@@ -348,8 +348,9 @@ to identify which words contributed most toward the primary emotion.
 5. Per-token attributions are summed across the embedding dimension and
    aggregated from subword tokens back to words using offset mappings.
 6. Adjacent words with positive attribution are merged into phrases.
-7. The top 3 phrases (by attribution weight) are returned as
-   `EvidenceSignal` objects with normalized weights.
+7. The top 5 phrases (by attribution weight) are returned as
+   `EvidenceSignal` objects with normalized weights. Between one and five
+   phrases are returned; the strongest word is always included.
 
 ### Configuration
 

@@ -17,13 +17,13 @@ The application uses a warm cream gradient as its base:
 | `cream-50` | `#FFFDF7` | Page background, header backdrop |
 | `cream-100` | `#FDF6EC` | Card hover states, input backgrounds |
 | `cream-200` | `#F5E6D0` | Borders, chart backgrounds, subtle fills |
-| `cream-300` | `#E8D5B8` | Below-threshold bar fills, secondary borders |
+| `cream-300` | `#E8D5B8` | Subtle fills, secondary borders |
 
 ### Accent
 
 | Token | Hex | Usage |
 |-------|-----|-------|
-| `coral-400` | `#F97D4D` | Above-threshold bar fills, focus rings, primary actions |
+| `coral-400` | `#F97D4D` | Spectrum and mix bar fills, focus rings, primary actions |
 | `coral-500` | `#E86B35` | Primary button background, ring stroke in primary emotion card |
 | `coral-600` | `#D15A28` | Primary button hover/active |
 
@@ -278,12 +278,13 @@ menu is an absolutely-positioned dropdown that appears below the header.
 
 ### EmotionMixCard
 
-Horizontal bars for detected emotions (above threshold):
+Horizontal bars for the five highest-scoring emotions:
 
 - **Bar height**: `h-2` (8px).
 - **Background**: `bg-cream-200` (track).
 - **Fill**: `bg-gradient-to-r from-coral-400 to-coral-500` (gradient).
-- **Width**: Inline `style={{ width: ${pct}% }}` based on score.
+- **Width**: Inline `style={{ width: ${percentage}% }}` using the shared
+  whole-number distribution derived from the full spectrum.
 - **Labels**: Emoji (w-6), capitalized name (w-28), percentage (w-10).
 
 The primary emotion row gets `bg-cream-100` background highlight.
@@ -293,9 +294,9 @@ The primary emotion row gets `bg-cream-100` background highlight.
 Horizontal bars for all 28 emotions:
 
 - **Bar height**: `h-1.5` (6px) — thinner than EmotionMixCard.
-- **Above threshold**: `bg-coral-400` (solid coral).
-- **Below threshold**: `bg-cream-300` (muted cream).
-- **Labels**: Emoji (w-5), capitalized name (w-24), percentage (w-9).
+- **Fill**: `bg-coral-400` (solid coral for every bar, regardless of score).
+- **Labels**: Emoji (w-5), capitalized name (w-24), percentage (w-9,
+  summing to 100% across all 28 emotions).
 - **Collapse/expand**: Controlled by a toggle button with ChevronDown
   icon that rotates 180° when expanded.
 

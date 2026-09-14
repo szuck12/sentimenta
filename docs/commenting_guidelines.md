@@ -109,11 +109,10 @@ All props and return types must be explicit:
 
 ```typescript
 interface SpectrumCardProps {
-  emotions: Array<{ label: string; score: number }>
-  threshold: number
+  emotions: EmotionPercentage[]
 }
 
-export function SpectrumCard({ emotions, threshold }: SpectrumCardProps) {
+export function SpectrumCard({ emotions }: SpectrumCardProps) {
 ```
 
 Rules:
@@ -168,7 +167,7 @@ ML-related code gets detailed block comments explaining the approach:
 # 4. Sum attributions across embedding dimension.
 # 5. Aggregate subtoken attributions to words using offset mappings.
 # 6. Merge adjacent words into phrases.
-# 7. Return top 3 phrases by attribution weight.
+# 7. Return top 5 phrases by attribution weight.
 ```
 
 These comments serve as algorithm documentation and are especially
@@ -318,7 +317,6 @@ const EMOJI_MAP: Record<string, string> = {
 }
 
 interface SpectrumCardProps {
-  emotions: Array<{ label: string; score: number }>
-  threshold: number
+  emotions: EmotionPercentage[]
 }
 ```

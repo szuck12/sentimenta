@@ -117,7 +117,7 @@ npm run test:coverage   # 80% coverage gate
 - **`test_explanation_service.py`** — probability fallbacks (attribution
   disabled, model not loaded, attribution raised), summary wording and
   rounding, and word/phrase aggregation from token attributions
-  (merging, cutoff, zero-length offsets, top-three cap).
+  (merging, cutoff, zero-length offsets, one-to-five cap).
 
 ---
 

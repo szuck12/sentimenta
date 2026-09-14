@@ -219,3 +219,20 @@ class TestIntegrityVerification:
         service = EmotionModelService(settings)
         service.load()
         assert service.is_loaded is True
+
+
+class TestAttributionSignals:
+    """Real attribution yields between one and five evidence phrases."""
+
+    def test_between_one_and_five_signals(
+        self, loaded_service: EmotionModelService
+    ) -> None:
+        from app.services.explanation_service import ExplanationService
+
+        settings = Settings(enable_attribution=True)
+        explainer = ExplanationService(loaded_service, settings)
+        text = "I am so happy and excited about this wonderful news!"
+        scores = loaded_service.predict([text])[0]
+        explanation = explainer.explain(text, scores)
+        assert explanation.method == "integrated_gradients"
+        assert 1 <= len(explanation.signals) <= 5

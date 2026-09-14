@@ -11,36 +11,36 @@ function percentages(): number[] {
 }
 
 describe('EmotionMixCard', () => {
-  it('renders each emotion with a normalized percentage', () => {
+  it('renders each emotion with its given share', () => {
     render(
       <EmotionMixCard
         emotions={[
-          { label: 'joy', score: 0.85 },
-          { label: 'excitement', score: 0.7 },
+          { label: 'joy', percentage: 55 },
+          { label: 'excitement', percentage: 45 },
         ]}
         primaryLabel="joy"
       />,
     )
     expect(screen.getByText('Joy')).toBeInTheDocument()
     expect(screen.getByText('Excitement')).toBeInTheDocument()
-    // 85 / (85 + 70) and 70 / (85 + 70), rounded to whole numbers.
     expect(screen.getByText('55%')).toBeInTheDocument()
     expect(screen.getByText('45%')).toBeInTheDocument()
   })
 
-  it('always sums to 100%', () => {
+  it('shows the provided shares verbatim (the mix need not sum to 100)', () => {
     render(
       <EmotionMixCard
         emotions={[
-          { label: 'joy', score: 0.85 },
-          { label: 'excitement', score: 0.7 },
-          { label: 'optimism', score: 0.4 },
-          { label: 'curiosity', score: 0.3 },
-          { label: 'neutral', score: 0.05 },
+          { label: 'joy', percentage: 37 },
+          { label: 'excitement', percentage: 30 },
+          { label: 'optimism', percentage: 17 },
+          { label: 'curiosity', percentage: 13 },
+          { label: 'neutral', percentage: 2 },
         ]}
         primaryLabel="joy"
       />,
     )
-    expect(percentages().reduce((sum, value) => sum + value, 0)).toBe(100)
+    // 37 + 30 + 17 + 13 + 2 = 99: the top five of a 100% distribution.
+    expect(percentages()).toEqual([37, 30, 17, 13, 2])
   })
 })

@@ -140,8 +140,10 @@ class ExplanationService:
             target: The emotion output neuron to attribute against.
 
         Returns:
-            Up to three phrases with normalized positive weights;
-            empty list when no token supports the target emotion.
+            Up to five phrases with normalized positive weights.  At
+            least one phrase is returned whenever the input contains a
+            usable word token; the list is empty only when there are no
+            word tokens at all.
 
         Raises:
             RuntimeError: Propagated from the model service when the
@@ -207,8 +209,9 @@ class ExplanationService:
                 target emotion.
 
         Returns:
-            Up to three adjacent-word phrases with the strongest
-            positive contribution, weights normalized to sum to 1.
+            Between one and five adjacent-word phrases with the strongest
+            contribution, weights normalized to sum to 1.  Empty only
+            when the text contains no word tokens.
         """
 
         @dataclass
@@ -231,14 +234,20 @@ class ExplanationService:
             else:
                 words.append(_Word(piece, start, end, value))
 
-        positives = [w for w in words if w.attr > 0]
-        if not positives:
+        if not words:
             return []
-        peak = max(w.attr for w in positives)
-        keep = [
-            w for w in positives
-            if w.attr >= peak * _SIGNAL_CUTOFF_RATIO
-        ]
+
+        positives = [w for w in words if w.attr > 0]
+        if positives:
+            peak = max(w.attr for w in positives)
+            keep = [
+                w for w in positives
+                if w.attr >= peak * _SIGNAL_CUTOFF_RATIO
+            ]
+        else:
+            # Guarantee at least one signal: when no word has positive
+            # attribution, surface the single most influential word.
+            keep = [max(words, key=lambda w: w.attr)]
 
         phrases: list[_Word] = []
         for word in keep:
@@ -253,7 +262,7 @@ class ExplanationService:
                 phrases.append(_Word(word.text, word.start, word.end, word.attr))
 
         phrases.sort(key=lambda p: p.attr, reverse=True)
-        top = phrases[:3]
+        top = phrases[:5]
         total = sum(p.attr for p in top) or 1.0
         return [
             EvidenceSignal(

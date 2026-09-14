@@ -84,7 +84,7 @@ Returns service liveness and model status.
 ```json
 {
   "status": "ok",
-  "version": "1.3.2",
+  "version": "1.3.3",
   "model_loaded": true
 }
 ```
@@ -574,7 +574,7 @@ probabilities. Shares are normalized to sum to 1.0.
 | Field | Type | Description |
 |-------|------|-------------|
 | `summary` | string | Template-generated factual description from model outputs. |
-| `signals` | EvidenceSignal[] | Up to 3 key phrases with normalized weights. Empty when attribution is unavailable. |
+| `signals` | EvidenceSignal[] | Between one and five key phrases with normalized weights. Empty only when there are no word tokens. |
 | `method` | string | `"integrated_gradients"` or `"probabilities"`. |
 | `target_label` | string | The primary emotion being explained. |
 

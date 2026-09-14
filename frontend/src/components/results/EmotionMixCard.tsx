@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
-import { cn, toWholePercentages } from '@/lib/utils'
+import { cn } from '@/lib/utils'
 import { Card } from '@/components/ui/Card'
+import type { EmotionPercentage } from '@/lib/types'
 
 const EMOJI_MAP: Record<string, string> = {
   admiration: '👏', amusement: '😄', anger: '😠',
@@ -20,7 +21,7 @@ function capitalize(s: string): string {
 }
 
 interface EmotionMixCardProps {
-  emotions: Array<{ label: string; score: number }>
+  emotions: EmotionPercentage[]
   primaryLabel: string
 }
 
@@ -28,8 +29,6 @@ export function EmotionMixCard({
   emotions,
   primaryLabel,
 }: EmotionMixCardProps) {
-  const percentages = toWholePercentages(emotions.map((e) => e.score))
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
@@ -42,8 +41,7 @@ export function EmotionMixCard({
         </h3>
 
         <div className="flex flex-col gap-2">
-          {emotions.map(({ label }, index) => {
-            const pct = percentages[index]
+          {emotions.map(({ label, percentage }) => {
             const isPrimary = label === primaryLabel
 
             return (
@@ -65,12 +63,12 @@ export function EmotionMixCard({
                 <div className="flex-1 h-2 rounded-full bg-cream-200 overflow-hidden">
                   <div
                     className="h-full rounded-full bg-gradient-to-r from-coral-400 to-coral-500 transition-all duration-500"
-                    style={{ width: `${pct}%` }}
+                    style={{ width: `${percentage}%` }}
                   />
                 </div>
 
                 <span className="w-10 text-right text-xs tabular-nums text-ink-700/70 shrink-0">
-                  {pct}%
+                  {percentage}%
                 </span>
               </div>
             )

@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Card } from '@/components/ui/Card'
+import type { EmotionPercentage } from '@/lib/types'
 
 const EMOJI_MAP: Record<string, string> = {
   admiration: '👏', amusement: '😄', anger: '😠',
@@ -22,14 +23,14 @@ function capitalize(s: string): string {
 }
 
 interface SpectrumCardProps {
-  emotions: Array<{ label: string; score: number }>
+  emotions: EmotionPercentage[]
 }
 
 export function SpectrumCard({ emotions }: SpectrumCardProps) {
   const [expanded, setExpanded] = useState(false)
 
   const sorted = [...emotions].sort(
-    (a, b) => b.score - a.score,
+    (a, b) => b.percentage - a.percentage,
   )
 
   return (
@@ -74,38 +75,31 @@ export function SpectrumCard({ emotions }: SpectrumCardProps) {
               className="overflow-hidden"
             >
               <div className="flex flex-col gap-1.5">
-                {sorted.map(({ label, score }) => {
-                  const pct = Math.round(score * 100)
+                {sorted.map(({ label, percentage }) => (
+                  <div
+                    key={label}
+                    className="flex items-center gap-3 py-1"
+                  >
+                    <span className="w-5 text-center shrink-0 text-xs">
+                      {EMOJI_MAP[label] ?? '❓'}
+                    </span>
 
-                  return (
-                    <div
-                      key={label}
-                      className="flex items-center gap-3 py-1"
-                    >
-                      <span className="w-5 text-center shrink-0 text-xs">
-                        {EMOJI_MAP[label] ?? '❓'}
-                      </span>
+                    <span className="w-24 text-xs text-ink-700 shrink-0">
+                      {capitalize(label)}
+                    </span>
 
-                      <span className="w-24 text-xs text-ink-700 shrink-0">
-                        {capitalize(label)}
-                      </span>
-
-                      <div className="flex-1 h-1.5 rounded-full bg-cream-200 overflow-hidden">
-                        <div
-                          className={cn(
-                            'h-full rounded-full transition-all duration-500',
-                            'bg-coral-400',
-                          )}
-                          style={{ width: `${pct}%` }}
-                        />
-                      </div>
-
-                      <span className="w-9 text-right text-xs tabular-nums text-ink-700/60 shrink-0">
-                        {pct}%
-                      </span>
+                    <div className="flex-1 h-1.5 rounded-full bg-cream-200 overflow-hidden">
+                      <div
+                        className="h-full rounded-full bg-coral-400 transition-all duration-500"
+                        style={{ width: `${percentage}%` }}
+                      />
                     </div>
-                  )
-                })}
+
+                    <span className="w-9 text-right text-xs tabular-nums text-ink-700/60 shrink-0">
+                      {percentage}%
+                    </span>
+                  </div>
+                ))}
               </div>
             </motion.div>
           )}

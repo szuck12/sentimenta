@@ -23,7 +23,7 @@ const SVG_SIZE = (RADIUS + STROKE_WIDTH) * 2
 
 interface PrimaryEmotionCardProps {
   label: string
-  score: number
+  percentage: number
   summary: string
   intensity: { score: number; label: string }
 }
@@ -38,13 +38,13 @@ function getIntensityVariant(
 
 export function PrimaryEmotionCard({
   label,
-  score,
+  percentage,
   summary,
   intensity,
 }: PrimaryEmotionCardProps) {
   const emoji = EMOJI_MAP[label] ?? '❓'
-  const pct = Math.round(score * 100)
-  const offset = CIRCUMFERENCE * (1 - score)
+  const pct = percentage
+  const offset = CIRCUMFERENCE * (1 - percentage / 100)
 
   return (
     <motion.div

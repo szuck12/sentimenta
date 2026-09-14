@@ -111,14 +111,27 @@ def test_words_to_signals_merges_adjacent_words() -> None:
     assert signals[0].weight == pytest.approx(1.0)
 
 
-def test_words_to_signals_empty_when_no_positive() -> None:
+def test_words_to_signals_returns_at_least_one_without_positives() -> None:
     service = ExplanationService(  # type: ignore[arg-type]
         FakeModelService(), _settings()
     )
     signals = service._words_to_signals(
         "abc", [[0, 1], [1, 2], [2, 3]], [-0.1, -0.2, -0.3]
     )
-    assert signals == []
+    # At least one token is always surfaced; contiguous tokens merge
+    # into the single word "abc".
+    assert len(signals) == 1
+    assert signals[0].text == "abc"
+    assert signals[0].weight == pytest.approx(1.0)
+
+
+def test_words_to_signals_returns_one_for_a_single_signal() -> None:
+    service = ExplanationService(  # type: ignore[arg-type]
+        FakeModelService(), _settings()
+    )
+    signals = service._words_to_signals("hi", [[0, 2]], [0.5])
+    assert len(signals) == 1
+    assert signals[0].text == "hi"
 
 
 def test_words_to_signals_cutoff_removes_weak_words() -> None:
@@ -143,12 +156,12 @@ def test_words_to_signals_ignores_zero_length_offsets() -> None:
     assert signals[0].text == "hi"
 
 
-def test_words_to_signals_returns_at_most_three_phrases() -> None:
+def test_words_to_signals_returns_at_most_five_phrases() -> None:
     service = ExplanationService(  # type: ignore[arg-type]
         FakeModelService(), _settings()
     )
-    text = "a b c d e f g"
-    offsets = [[i * 2, i * 2 + 1] for i in range(7)]
-    attrs = [1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4]
+    text = "a   b   c   d   e   f   g"
+    offsets = [[i * 4, i * 4 + 1] for i in range(7)]
+    attrs = [1.0] * 7
     signals = service._words_to_signals(text, offsets, attrs)
-    assert len(signals) <= 3
+    assert len(signals) == 5
