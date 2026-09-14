@@ -176,7 +176,7 @@ The two files serve different audiences:
 
 ## Current TODO.md Snapshot
 
-The following items are currently tracked (as of v1.0.1):
+The following items are currently tracked (as of v1.1.0):
 
 ### High Priority
 

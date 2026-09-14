@@ -25,8 +25,8 @@ Only the latest release receives security fixes:
 
 | Version | Supported          |
 |---------|--------------------|
-| 1.0.x   | Yes (current)      |
-| < 1.0   | No                 |
+| 1.1.x   | Yes (current)      |
+| < 1.1   | No                 |
 
 ## Reporting a Vulnerability
 

@@ -5,7 +5,7 @@ All notable changes to this project are documented in this file.
 The format follows [Keep a Changelog](https://keepachangelog.com) and this
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.0.1] - 2026-09-13
+## [1.1.0] - 2026-09-05
 
 ### Added
 
@@ -36,7 +36,7 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
-- **Version bumped to 1.0.1** across the backend settings, frontend
+- **Version bumped to 1.1.0** across the backend settings, frontend
   package, README, and security policy.
 - **Fast tests no longer import PyTorch** — `EmotionModelService` and
   `ExplanationService` now import `torch`/`captum` lazily, so the unit and

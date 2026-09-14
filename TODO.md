@@ -6,7 +6,7 @@
 
 ## Done
 
-- [x] 2026-09-13 — v1.0.1 — repository hardening: expanded backend and
+- [x] 2026-09-05 — v1.1.0 — repository hardening: expanded backend and
       frontend test suites (coverage gates, `--runmodel` gate, lazy
       PyTorch imports), corrected CI pipeline, expanded README and
       security policy, and dependency-update automation (#test, #docs,
