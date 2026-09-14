@@ -3,11 +3,14 @@
 # emotion model exactly once before accepting requests.
 
 import logging
+from collections.abc import Awaitable, Callable
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.responses import Response
 
 from .api import routes
 from .core.config import Settings, get_settings
@@ -51,18 +54,40 @@ async def lifespan(app: FastAPI):  # type: ignore[no-untyped-def]
     logger.info("Shutting down")
 
 
+async def add_security_headers(
+    request: Request,
+    call_next: Callable[[Request], Awaitable[Response]],
+) -> Response:
+    """Attach conservative security headers to every response."""
+    response = await call_next(request)
+    response.headers.setdefault("X-Content-Type-Options", "nosniff")
+    response.headers.setdefault("Referrer-Policy", "no-referrer")
+    response.headers.setdefault("X-Frame-Options", "DENY")
+    response.headers.setdefault(
+        "Cross-Origin-Resource-Policy", "same-origin"
+    )
+    return response
+
+
 def create_app() -> FastAPI:
     """Build and configure the FastAPI application.
 
     Returns:
-        A fully configured application with CORS, error handlers,
-        and the analysis endpoints mounted under ``/api``.
+        A fully configured application with CORS, security headers,
+        error handlers, and the analysis endpoints mounted under
+        ``/api``.
     """
     settings = get_settings()
+    docs_url = "/docs" if settings.enable_docs else None
+    redoc_url = "/redoc" if settings.enable_docs else None
+    openapi_url = "/openapi.json" if settings.enable_docs else None
     app = FastAPI(
         title=settings.app_name,
         version=settings.version,
         lifespan=lifespan,
+        docs_url=docs_url,
+        redoc_url=redoc_url,
+        openapi_url=openapi_url,
     )
     app.add_middleware(
         CORSMiddleware,
@@ -70,6 +95,7 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+    app.add_middleware(BaseHTTPMiddleware, dispatch=add_security_headers)
     app.add_exception_handler(AppError, app_error_handler)  # type: ignore[arg-type]
     app.add_exception_handler(
         RequestValidationError, validation_error_handler  # type: ignore[arg-type]

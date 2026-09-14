@@ -33,8 +33,15 @@ class Settings(BaseSettings):
             length before attribution to bound its cost.
         model_id: Hugging Face model identifier for the GoEmotions
             classifier.
+        model_revision: Immutable commit revision of the model
+            repository. Pinning to a specific revision prevents a
+            mutable upstream tag from silently changing the weights
+            that are loaded.
         device: Torch device string ("cpu" or "mps"); empty selects
             automatically.
+        enable_docs: Whether to expose the interactive API docs
+            (`/docs`, `/redoc`) and the OpenAPI schema. Disable in
+            production to reduce the exposed surface.
         log_level: Uvicorn/loguru-free stdlib logging level.
     """
 
@@ -43,7 +50,7 @@ class Settings(BaseSettings):
     )
 
     app_name: str = "Sentimenta API"
-    version: str = "1.1.0"
+    version: str = "1.2.0"
 
     cors_origins: list[str] = [
         "http://localhost:5173",
@@ -63,7 +70,10 @@ class Settings(BaseSettings):
     attribution_max_tokens: int = 128
 
     model_id: str = "SamLowe/roberta-base-go_emotions"
+    model_revision: str = "d75048347613a25d77de8cf6412eaae9fa7b26be"
     device: str = ""
+
+    enable_docs: bool = True
 
     log_level: str = "INFO"
 

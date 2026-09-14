@@ -1,6 +1,6 @@
 # Sentimenta
 
-Current version: **1.1.0** — [Changelog](CHANGELOG.md)
+Current version: **1.2.0** — [Changelog](CHANGELOG.md)
 
 Understand what your words are feeling.
 
@@ -94,7 +94,8 @@ emotion and lists every label at or above a tunable detection threshold
 The input is truncated to a 256-token budget; longer text is still
 analyzed, but the response flags `truncated_tokens: true`. Weights load
 once at startup and inference runs inside the FastAPI process, so no text
-ever leaves the server.
+ever leaves the server. The model is pinned to an immutable commit
+revision and loaded through safetensors only.
 
 ## Architecture
 
@@ -298,7 +299,8 @@ without a restart.
 The backend reads configuration from environment variables prefixed with
 `SENTIMENTA_` (see `.env.example`). The most useful knobs are
 `SENTIMENTA_EMOTION_THRESHOLD` (how eager detection is),
-`SENTIMENTA_ENABLE_ATTRIBUTION` (token evidence on/off), and
+`SENTIMENTA_ENABLE_ATTRIBUTION` (token evidence on/off),
+`SENTIMENTA_ENABLE_DOCS` (hide `/docs` in production), and
 `SENTIMENTA_CORS_ORIGINS` (which browser origins may call the API).
 
 ## Testing

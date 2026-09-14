@@ -5,6 +5,43 @@ All notable changes to this project are documented in this file.
 The format follows [Keep a Changelog](https://keepachangelog.com) and this
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-09-13
+
+### Added
+
+- **Security hardening release** — dependency upgrades across the
+  frontend and backend that clear all known advisories; both `npm audit`
+  and `pip-audit` now report zero vulnerabilities.
+- **Immutable model pinning** — `SENTIMENTA_MODEL_REVISION` pins the
+  Hugging Face model to a specific commit, and weights load through
+  safetensors only, protecting against a mutable upstream tag.
+- **Security response headers** — every API response carries
+  `X-Content-Type-Options`, `Referrer-Policy`, `X-Frame-Options`, and
+  `Cross-Origin-Resource-Policy`.
+- **`SENTIMENTA_ENABLE_DOCS`** — opt-out for `/docs`, `/redoc`, and
+  `/openapi.json` so production deployments can hide the API schema.
+- **CI dependency audits** — `npm audit` and `pip-audit` run in the
+  pipeline, alongside least-privilege workflow permissions, commit-SHA
+  pinned actions, and Dependabot coverage for GitHub Actions.
+- **Expanded `.gitignore`** — ignores environment variants, key files,
+  logs, and build output.
+
+### Changed
+
+- **Frontend toolchain upgraded** — React Router, Vite, PostCSS,
+  Vitest, and the coverage provider moved to patched releases.
+- **Backend runtime upgraded** — FastAPI/Starlette, Transformers,
+  PyTorch, Captum, Uvicorn, and Pydantic moved to patched releases.
+- **Pre-commit Prettier hook** moved from a deprecated alpha mirror to a
+  stable mirror.
+
+### Fixed
+
+- **Tokenizer typing under Transformers 5** — the model service now
+  annotates the tokenizer/model attributes explicitly so `mypy` passes.
+- **Deprecated Starlette status constant** — replaced
+  `HTTP_422_UNPROCESSABLE_ENTITY` with `HTTP_422_UNPROCESSABLE_CONTENT`.
+
 ## [1.1.0] - 2026-09-05
 
 ### Added

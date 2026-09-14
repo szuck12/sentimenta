@@ -6,8 +6,8 @@ alongside their source code:
 
 - `backend/tests/` -- unit and API-level tests (model stubs, FastAPI
   TestClient).
-- `frontend/src/**/*.test.tsx` -- component and hook tests (Vitest + React
-  Testing Library).
+- `frontend/tests/` -- component, hook, page, and routing tests (Vitest +
+  React Testing Library).
 - `tests/` (this directory) -- cross-layer integration tests and fixtures
   that require both backend and frontend to be running.
 

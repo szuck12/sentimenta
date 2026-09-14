@@ -3,6 +3,9 @@
 # with the stub analysis service.
 
 import httpx
+import pytest
+
+from app.core.config import Settings
 
 
 async def test_health(client: httpx.AsyncClient) -> None:
@@ -188,3 +191,31 @@ async def test_cors_header_present_on_post(client: httpx.AsyncClient) -> None:
         resp.headers.get("access-control-allow-origin")
         == "http://localhost:5173"
     )
+
+
+async def test_security_headers_present(client: httpx.AsyncClient) -> None:
+    resp = await client.get("/api/health")
+    assert resp.headers.get("x-content-type-options") == "nosniff"
+    assert resp.headers.get("referrer-policy") == "no-referrer"
+    assert resp.headers.get("x-frame-options") == "DENY"
+
+
+async def test_docs_available_by_default(client: httpx.AsyncClient) -> None:
+    assert (await client.get("/openapi.json")).status_code == 200
+
+
+async def test_docs_can_be_disabled(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from app.main import create_app
+
+    monkeypatch.setattr(
+        "app.main.get_settings", lambda: Settings(enable_docs=False)
+    )
+    application = create_app()
+    transport = httpx.ASGITransport(app=application)
+    async with httpx.AsyncClient(
+        transport=transport, base_url="http://test"
+    ) as ac:
+        assert (await ac.get("/docs")).status_code == 404
+        assert (await ac.get("/openapi.json")).status_code == 404

@@ -143,8 +143,9 @@ class TestOffsetPredictions:
         )
         probs = loaded_service.forward_locked(device_inputs)
         assert probs.shape == (1, 28)
-        assert float(probs.min()) >= 0.0
-        assert float(probs.max()) <= 1.0
+        detached = probs.detach()
+        assert float(detached.min()) >= 0.0
+        assert float(detached.max()) <= 1.0
 
 
 class TestModelServiceState:

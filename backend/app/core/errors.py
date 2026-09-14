@@ -31,7 +31,7 @@ class EmptyTextError(AppError):
 
     def __init__(self) -> None:
         super().__init__(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             code="empty_text",
             message="Please provide some text to analyze.",
         )
@@ -42,7 +42,7 @@ class TextTooLongError(AppError):
 
     def __init__(self, max_chars: int, actual: int) -> None:
         super().__init__(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             code="text_too_long",
             message=(
                 f"Text is {actual} characters; the limit is "
@@ -87,7 +87,7 @@ async def validation_error_handler(
     if loc:
         message = f"{loc}: {message}"
     return JSONResponse(
-        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
         content={
             "error": {
                 "code": "invalid_request",

@@ -10,18 +10,23 @@ venv/
 .mypy_cache/
 .ruff_cache/
 .coverage
+coverage/
 htmlcov/
 
 # Node
 node_modules/
-frontend/dist/
-coverage/
+dist/
 playwright-report/
 test-results/
 *.tsbuildinfo
 
 # Environment / secrets
 .env
+.env.*
+!.env.example
+*.pem
+*.key
+*.log
 
 # OS artifacts
 .DS_Store

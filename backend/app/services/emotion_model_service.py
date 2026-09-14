@@ -7,7 +7,7 @@ from __future__ import annotations
 import logging
 import threading
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     import torch
@@ -60,8 +60,8 @@ class EmotionModelService:
         import torch
 
         self.settings = settings
-        self.tokenizer = None
-        self.model = None
+        self.tokenizer: Any = None
+        self.model: Any = None
         self.max_input_tokens = MAX_INPUT_TOKENS
         self.device = torch.device(
             settings.device
@@ -92,12 +92,21 @@ class EmotionModelService:
                 AutoTokenizer,
             )
 
-            logger.info("Loading model %s ...", self.settings.model_id)
+            logger.info(
+                "Loading model %s@%s ...",
+                self.settings.model_id,
+                self.settings.model_revision or "main",
+            )
+            revision = self.settings.model_revision or None
             self.tokenizer = AutoTokenizer.from_pretrained(
-                self.settings.model_id
+                self.settings.model_id,
+                revision=revision,
+                use_safetensors=True,
             )
             self.model = AutoModelForSequenceClassification.from_pretrained(
-                self.settings.model_id
+                self.settings.model_id,
+                revision=revision,
+                use_safetensors=True,
             )
             assert self.model is not None
             self.model.to(self.device)

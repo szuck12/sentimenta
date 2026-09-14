@@ -255,11 +255,13 @@ The model tests are the deliberate exception and are kept behind the
 
 ## CI Integration
 
-`.github/workflows/ci.yml` runs three jobs:
+`.github/workflows/ci.yml` runs three jobs (all with a read-only
+`GITHUB_TOKEN` and commit-SHA-pinned actions):
 
-1. **Frontend** — `npm ci`, lint, typecheck, `test:coverage`, build.
-2. **Backend** — install dev requirements, `ruff`, `mypy`, and the fast
-   suite with the 85% coverage gate.
+1. **Frontend** — `npm ci`, lint, typecheck, `test:coverage`, build, then
+   `npm audit --audit-level=high`.
+2. **Backend** — install dev requirements, `ruff`, `mypy`, the fast suite
+   with the 85% coverage gate, then `pip-audit`.
 3. **Model integration** — after the backend job, run
    `pytest tests/model -v --runmodel` with the Hugging Face cache
    restored between runs.

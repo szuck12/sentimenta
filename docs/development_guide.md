@@ -58,7 +58,7 @@ Check readiness:
 
 ```bash
 curl http://localhost:8000/api/health
-# {"status":"ok","version":"1.1.0","model_id":"SamLowe/roberta-base-go_emotions","model_loaded":true}
+# {"status":"ok","version":"1.2.0","model_id":"SamLowe/roberta-base-go_emotions","model_loaded":true}
 ```
 
 ---
@@ -107,11 +107,13 @@ Key variables:
 | `SENTIMENTA_LOG_LEVEL` | `INFO` | Logging level |
 | `SENTIMENTA_MAX_TEXT_CHARS` | `2000` | Maximum input length |
 | `SENTIMENTA_MODEL_ID` | `SamLowe/roberta-base-go_emotions` | Hugging Face model |
+| `SENTIMENTA_MODEL_REVISION` | pinned commit | Immutable model commit (supply-chain integrity) |
 | `SENTIMENTA_DEVICE` | (auto) | `cpu`, `mps`, or empty for auto |
 | `SENTIMENTA_EMOTION_THRESHOLD` | `0.30` | Detection threshold |
 | `SENTIMENTA_SENTENCE_LIMIT` | `10` | Max sentences per analysis |
 | `SENTIMENTA_ENABLE_ATTRIBUTION` | `true` | Captum attribution switch |
 | `SENTIMENTA_ATTRIBUTION_STEPS` | `16` | Integrated gradient steps |
+| `SENTIMENTA_ENABLE_DOCS` | `true` | Expose `/docs`, `/redoc`, `/openapi.json` |
 
 Settings are read with the `SENTIMENTA_` prefix via `pydantic-settings`.
 The backend reads a `.env` file at the project root if present.

@@ -25,8 +25,8 @@ Only the latest release receives security fixes:
 
 | Version | Supported          |
 |---------|--------------------|
-| 1.1.x   | Yes (current)      |
-| < 1.1   | No                 |
+| 1.2.x   | Yes (current)      |
+| < 1.2   | No                 |
 
 ## Reporting a Vulnerability
 
@@ -74,3 +74,30 @@ available. Please refrain from public disclosure before a fix ships.
 - Treat model outputs as estimates, not facts: adversarial or ambiguous
   input can produce misleading readings, and the application makes no
   security or factual guarantees about them.
+
+## Dependency & Supply Chain
+
+- Direct dependencies are **pinned to exact versions**, and both trees are
+  scanned in CI on every push and pull request: `pip-audit` for Python and
+  `npm audit --audit-level=high` for Node. The project currently reports
+  **zero known vulnerabilities**.
+- Weekly **Dependabot** updates cover pip, npm, and GitHub Actions.
+- CI runs with a **read-only** `GITHUB_TOKEN`, actions are pinned to commit
+  SHAs, and checkout credentials are not persisted.
+- The model is loaded from an **immutable commit revision**
+  (`SENTIMENTA_MODEL_REVISION`) and only through **safetensors**, never
+  through pickle-based weights or remote code (`trust_remote_code` is not
+  enabled).
+- The API exposes no file-serving, form-upload, or static-file routes, which
+  keeps large classes of framework advisories unreachable.
+
+## Production Recommendations
+
+- Set `SENTIMENTA_ENABLE_DOCS=false` to hide `/docs`, `/redoc`, and
+  `/openapi.json`.
+- Enforce **rate limiting** at the reverse proxy or hosting platform: model
+  inference (especially token attribution) is CPU-intensive, and the API is
+  intentionally unauthenticated.
+- Terminate TLS at a trusted proxy and forward only the required headers.
+- Avoid logging request bodies; the application logs only aggregate
+  metadata.

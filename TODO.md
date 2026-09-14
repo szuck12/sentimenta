@@ -6,6 +6,10 @@
 
 ## Done
 
+- [x] 2026-09-13 — v1.2.0 — security hardening and public-release prep:
+      zero-vulnerability dependency upgrades, pinned model revision,
+      security headers, docs toggle, CI audits and supply-chain
+      hardening (#security, #infra, #docs)
 - [x] 2026-09-05 — v1.1.0 — repository hardening: expanded backend and
       frontend test suites (coverage gates, `--runmodel` gate, lazy
       PyTorch imports), corrected CI pipeline, expanded README and
