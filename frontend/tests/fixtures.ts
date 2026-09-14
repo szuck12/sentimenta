@@ -15,7 +15,10 @@ export function makeAnalyzeResponse(
     all_emotions: [
       { label: 'joy', score: 0.85 },
       { label: 'excitement', score: 0.7 },
+      { label: 'optimism', score: 0.4 },
+      { label: 'curiosity', score: 0.3 },
       { label: 'neutral', score: 0.05 },
+      { label: 'anger', score: 0.02 },
     ],
     intensity: { score: 0.9, label: 'high' },
     profile: {

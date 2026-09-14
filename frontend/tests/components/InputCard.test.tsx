@@ -46,14 +46,32 @@ describe('InputCard', () => {
       screen.getByRole('button', { name: 'Excitement' }),
     ).toBeInTheDocument()
     expect(
+      screen.getByRole('button', { name: 'Fear' }),
+    ).toBeInTheDocument()
+    expect(
       screen.getByRole('button', { name: 'Neutral' }),
     ).toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: 'Worry' }),
+    ).not.toBeInTheDocument()
   })
 
   it('populates text on example click', async () => {
     setup()
     await userEvent.click(screen.getByRole('button', { name: 'Gratitude' }))
     expect(textarea().value).toContain('Thank you')
+  })
+
+  it('fills the excitement example sentence', async () => {
+    setup()
+    await userEvent.click(screen.getByRole('button', { name: 'Excitement' }))
+    expect(textarea().value).toContain('excited')
+  })
+
+  it('fills the fear example sentence', async () => {
+    setup()
+    await userEvent.click(screen.getByRole('button', { name: 'Fear' }))
+    expect(textarea().value).toContain('terrified')
   })
 
   it('disables analyze while the text is empty', () => {

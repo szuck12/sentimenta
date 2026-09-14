@@ -20,7 +20,7 @@ describe('App routing', () => {
     render(<App />)
     expect(
       screen.getByRole('heading', {
-        name: /what are your words feeling/i,
+        name: /what emotion does this text convey/i,
       }),
     ).toBeInTheDocument()
   })

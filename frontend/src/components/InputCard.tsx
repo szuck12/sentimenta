@@ -23,8 +23,8 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>
 
 const EXAMPLES = [
-  { text: "I finally got the job I've been hoping for!", label: 'Excitement' },
-  { text: "I'm worried about what tomorrow will bring.", label: 'Worry' },
+  { text: "I'm so excited I can barely sit still!", label: 'Excitement' },
+  { text: "I'm terrified that something terrible is about to happen.", label: 'Fear' },
   { text: "I can't believe they did that.", label: 'Surprise' },
   { text: "Thank you so much for helping me.", label: 'Gratitude' },
   { text: "I don't really know how I feel about this.", label: 'Confusion' },

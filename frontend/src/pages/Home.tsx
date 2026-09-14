@@ -27,7 +27,7 @@ export function Home() {
       {/* Hero */}
       <section className="text-center mb-12">
         <h1 className="text-4xl sm:text-5xl font-display font-bold text-ink-800 tracking-tight mb-4">
-          What are your words feeling?
+          What emotion does this text convey?
         </h1>
         <p className="text-lg text-ink-700/60 max-w-xl mx-auto">
           Explore the emotions hiding inside your text.

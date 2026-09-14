@@ -19,6 +19,21 @@ describe('ResultsSection', () => {
     ).toBeInTheDocument()
   })
 
+  it('shows exactly the top five emotions in the mix', () => {
+    render(<ResultsSection result={makeAnalyzeResponse()} />)
+    for (const label of [
+      'Joy',
+      'Excitement',
+      'Optimism',
+      'Curiosity',
+      'Neutral',
+    ]) {
+      expect(screen.getByText(label)).toBeInTheDocument()
+    }
+    // The sixth-ranked emotion is excluded from the mix.
+    expect(screen.queryByText('Anger')).not.toBeInTheDocument()
+  })
+
   it('omits the journey card for single-sentence results', () => {
     const result = makeAnalyzeResponse({
       sentences: [

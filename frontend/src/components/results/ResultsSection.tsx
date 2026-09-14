@@ -28,13 +28,13 @@ const item = {
 export function ResultsSection({ result }: ResultsSectionProps) {
   const {
     primary_emotion,
-    emotions,
     all_emotions,
     intensity,
     explanation,
     sentences,
-    metadata,
   } = result
+
+  const topEmotions = all_emotions.slice(0, 5)
 
   return (
     <motion.div
@@ -54,7 +54,7 @@ export function ResultsSection({ result }: ResultsSectionProps) {
 
       <motion.div variants={item}>
         <EmotionMixCard
-          emotions={emotions}
+          emotions={topEmotions}
           primaryLabel={primary_emotion.label}
         />
       </motion.div>
@@ -74,10 +74,7 @@ export function ResultsSection({ result }: ResultsSectionProps) {
       )}
 
       <motion.div variants={item}>
-        <SpectrumCard
-          emotions={all_emotions}
-          threshold={metadata.threshold}
-        />
+        <SpectrumCard emotions={all_emotions} />
       </motion.div>
 
       <motion.div variants={item}>

@@ -23,13 +23,9 @@ function capitalize(s: string): string {
 
 interface SpectrumCardProps {
   emotions: Array<{ label: string; score: number }>
-  threshold: number
 }
 
-export function SpectrumCard({
-  emotions,
-  threshold,
-}: SpectrumCardProps) {
+export function SpectrumCard({ emotions }: SpectrumCardProps) {
   const [expanded, setExpanded] = useState(false)
 
   const sorted = [...emotions].sort(
@@ -80,7 +76,6 @@ export function SpectrumCard({
               <div className="flex flex-col gap-1.5">
                 {sorted.map(({ label, score }) => {
                   const pct = Math.round(score * 100)
-                  const above = score >= threshold
 
                   return (
                     <div
@@ -99,9 +94,7 @@ export function SpectrumCard({
                         <div
                           className={cn(
                             'h-full rounded-full transition-all duration-500',
-                            above
-                              ? 'bg-coral-400'
-                              : 'bg-cream-300',
+                            'bg-coral-400',
                           )}
                           style={{ width: `${pct}%` }}
                         />

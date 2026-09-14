@@ -5,6 +5,25 @@ All notable changes to this project are documented in this file.
 The format follows [Keep a Changelog](https://keepachangelog.com) and this
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.3] - 2026-09-14
+
+### Changed
+
+- **Emotion Mix** now always shows the **top five emotions** with their
+  percentages, instead of a varying number of threshold-detected
+  emotions.
+- **Full Spectrum** now renders every bar in the same coral colour; the
+  lighter shade for below-threshold emotions was removed.
+- **Home hero heading** changed from "What are your words feeling?" to
+  **"What emotion does this text convey?"**.
+
+### Fixed
+
+- **Example chips** — the "Excitement" example now produces excitement as
+  the dominant emotion, and the "Worry" chip was replaced with **"Fear"**
+  (worry is not a GoEmotions label) with a sentence whose primary emotion
+  is fear.
+
 ## [1.3.2] - 2026-09-14
 
 ### Fixed

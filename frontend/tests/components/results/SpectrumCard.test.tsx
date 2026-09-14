@@ -12,7 +12,7 @@ const emotions = [
 
 describe('SpectrumCard', () => {
   it('hides the spectrum until expanded', () => {
-    render(<SpectrumCard emotions={emotions} threshold={0.3} />)
+    render(<SpectrumCard emotions={emotions} />)
     expect(screen.queryByText('Joy')).not.toBeInTheDocument()
     expect(
       screen.getByRole('button', { name: /show full spectrum/i }),
@@ -20,12 +20,24 @@ describe('SpectrumCard', () => {
   })
 
   it('reveals every emotion when expanded', async () => {
-    render(<SpectrumCard emotions={emotions} threshold={0.3} />)
+    render(<SpectrumCard emotions={emotions} />)
     await userEvent.click(
       screen.getByRole('button', { name: /show full spectrum/i }),
     )
     expect(await screen.findByText('Joy')).toBeInTheDocument()
     expect(screen.getByText('Anger')).toBeInTheDocument()
     expect(screen.getByText('85%')).toBeInTheDocument()
+  })
+
+  it('renders every bar in the same coral colour', async () => {
+    render(<SpectrumCard emotions={emotions} />)
+    await userEvent.click(
+      screen.getByRole('button', { name: /show full spectrum/i }),
+    )
+    await screen.findByText('Joy')
+    // Both the high and low emotion bars use the normal coral colour.
+    const coral = document.querySelectorAll('.bg-coral-400')
+    expect(coral.length).toBe(2)
+    expect(document.querySelectorAll('.bg-cream-300').length).toBe(0)
   })
 })
